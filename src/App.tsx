@@ -10,6 +10,7 @@ import Gym from './pages/Gym'
 import TimePage from './pages/Time'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
+import Leads from './pages/Leads'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -36,6 +37,7 @@ function AppRoutes() {
           <Route path="/health" element={<ProtectedRoute><Health /></ProtectedRoute>} />
           <Route path="/gym" element={<ProtectedRoute><Gym /></ProtectedRoute>} />
           <Route path="/time" element={<ProtectedRoute><TimePage /></ProtectedRoute>} />
+          <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

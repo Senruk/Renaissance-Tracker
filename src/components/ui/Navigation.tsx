@@ -1,12 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CheckSquare2, Droplets, Dumbbell, Clock, BarChart3, Settings } from 'lucide-react'
+import { LayoutDashboard, CheckSquare2, Droplets, Dumbbell, BarChart3, Settings, Users } from 'lucide-react'
 
 const NAV_ITEMS = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Today' },
   { path: '/habits', icon: CheckSquare2, label: 'Habits' },
   { path: '/health', icon: Droplets, label: 'Health' },
   { path: '/gym', icon: Dumbbell, label: 'Gym' },
-  { path: '/time', icon: Clock, label: 'Time' },
+  { path: '/leads', icon: Users, label: 'Leads' },
   { path: '/analytics', icon: BarChart3, label: 'Stats' },
   { path: '/settings', icon: Settings, label: 'More' },
 ]

@@ -167,7 +167,28 @@ alter table focus_sessions enable row level security;
 create policy "Users can read own focus_sessions" on focus_sessions for select using (auth.uid() = user_id);
 create policy "Users can insert own focus_sessions" on focus_sessions for insert with check (auth.uid() = user_id);
 
--- 12. XP LOGS
+-- 12. LEADS (SMMA lead tracking)
+create table if not exists leads (
+  id bigint generated always as identity primary key,
+  user_id uuid references auth.users not null,
+  business_name text not null,
+  contact_name text default '',
+  phone text default '',
+  email text default '',
+  notes text default '',
+  status text not null default 'pending' check (status in ('pending', 'yes', 'no', 'maybe')),
+  source text default '',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+alter table leads enable row level security;
+create policy "Users can read own leads" on leads for select using (auth.uid() = user_id);
+create policy "Users can insert own leads" on leads for insert with check (auth.uid() = user_id);
+create policy "Users can update own leads" on leads for update using (auth.uid() = user_id);
+create policy "Users can delete own leads" on leads for delete using (auth.uid() = user_id);
+create index if not exists idx_leads_user_status on leads(user_id, status);
+
+-- 13. XP LOGS
 create table if not exists xp_logs (
   id bigint generated always as identity primary key,
   user_id uuid references auth.users not null,
