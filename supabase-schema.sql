@@ -188,7 +188,22 @@ create policy "Users can update own leads" on leads for update using (auth.uid()
 create policy "Users can delete own leads" on leads for delete using (auth.uid() = user_id);
 create index if not exists idx_leads_user_status on leads(user_id, status);
 
--- 13. XP LOGS
+-- 13. CALL LOGS (track daily call attempts)
+create table if not exists call_logs (
+  id bigint generated always as identity primary key,
+  user_id uuid references auth.users not null,
+  lead_id bigint references leads on delete cascade not null,
+  outcome text not null check (outcome in ('yes', 'no', 'maybe', 'no_answer')),
+  notes text default '',
+  created_at timestamptz default now()
+);
+alter table call_logs enable row level security;
+create policy "Users can read own call_logs" on call_logs for select using (auth.uid() = user_id);
+create policy "Users can insert own call_logs" on call_logs for insert with check (auth.uid() = user_id);
+create policy "Users can delete own call_logs" on call_logs for delete using (auth.uid() = user_id);
+create index if not exists idx_call_logs_user_date on call_logs(user_id, created_at);
+
+-- 14. XP LOGS
 create table if not exists xp_logs (
   id bigint generated always as identity primary key,
   user_id uuid references auth.users not null,

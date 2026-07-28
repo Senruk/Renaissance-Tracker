@@ -37,7 +37,6 @@ export function useData() {
     const [habits, habit_logs, water, mood, tasks, time, workouts, quests, focus] = await Promise.all([
       supabase.from('habits').select('*').eq('user_id', user.id).order('created_at'),
       supabase.from('habit_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('habits').select('*').eq('user_id', user.id).order('created_at'),
       supabase.from('water_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
       supabase.from('mood_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
       supabase.from('tasks').select('*').eq('user_id', user.id).order('created_at'),

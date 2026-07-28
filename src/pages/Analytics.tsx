@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useData } from '../hooks/useData'
+import { supabase } from '../lib/supabase'
 import GlassCard from '../components/ui/GlassCard'
 import { motion } from 'framer-motion'
 import { BarChart3, TrendingUp, Calendar, Award } from 'lucide-react'
@@ -7,19 +9,61 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { BADGES } from '../lib/constants'
 
 export default function Analytics() {
-  const { profile } = useAuth()
+  const { profile, user } = useAuth()
   const { todayWater, todayMood, completedTasks, todayFocus } = useData()
 
-  // Mock weekly water data (in production, aggregate from DB)
-  const weeklyWater = Array.from({ length: 7 }).map((_, i) => ({
-    day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i],
-    ml: Math.floor(Math.random() * 1500) + 500,
-  }))
+  const [weeklyWater, setWeeklyWater] = useState<{ day: string; ml: number }[]>([])
+  const [weeklyMood, setWeeklyMood] = useState<{ day: string; mood: number }[]>([])
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-  const weeklyMood = Array.from({ length: 7 }).map((_, i) => ({
-    day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i],
-    mood: Math.floor(Math.random() * 3) + 2,
-  }))
+  useEffect(() => {
+    if (!user) return
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+
+    supabase.from('water_logs')
+      .select('date, amount_ml')
+      .eq('user_id', user.id)
+      .gte('date', sevenDaysAgo.toISOString().split('T')[0])
+      .lte('date', new Date().toISOString().split('T')[0])
+      .order('date')
+      .then(({ data }) => {
+        const grouped: Record<string, number> = {}
+        data?.forEach(l => { grouped[l.date] = (grouped[l.date] || 0) + l.amount_ml })
+        const days = []
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(); d.setDate(d.getDate() - i)
+          const key = d.toISOString().split('T')[0]
+          const idx = d.getDay()
+          days.push({ day: DAYS[idx], ml: grouped[key] || 0 })
+        }
+        setWeeklyWater(days)
+      })
+
+    supabase.from('mood_logs')
+      .select('date, mood_score')
+      .eq('user_id', user.id)
+      .gte('date', sevenDaysAgo.toISOString().split('T')[0])
+      .lte('date', new Date().toISOString().split('T')[0])
+      .order('date')
+      .then(({ data }) => {
+        const byDate: Record<string, number[]> = {}
+        data?.forEach(l => {
+          if (!byDate[l.date]) byDate[l.date] = []
+          byDate[l.date].push(l.mood_score)
+        })
+        const days = []
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(); d.setDate(d.getDate() - i)
+          const key = d.toISOString().split('T')[0]
+          const idx = d.getDay()
+          const scores = byDate[key]
+          const avg = scores ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0
+          days.push({ day: DAYS[idx], mood: avg || 3 })
+        }
+        setWeeklyMood(days)
+      })
+  }, [user])
 
   const earnedBadges = BADGES.slice(0, Math.min(profile?.level || 1, BADGES.length))
 
