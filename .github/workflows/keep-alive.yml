@@ -1,0 +1,19 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Every 3 days at 2:00 UTC — real DB query to prevent free-tier auto-pause
+    - cron: '0 2 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Supabase DB to prevent pause
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9odGNhcXpnZnpib3NjamRyYnZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NDQ3ODgsImV4cCI6MjA5NjQyMDc4OH0.oqSkdBW5mDfaW8UODCbT9hzpGW2H1Fb76shfnALgqbg" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9odGNhcXpnZnpib3NjamRyYnZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NDQ3ODgsImV4cCI6MjA5NjQyMDc4OH0.oqSkdBW5mDfaW8UODCbT9hzpGW2H1Fb76shfnALgqbg" \
+            -H "Prefer: count=exact" \
+            "https://ohtcaqzgfzboscjdrbvp.supabase.co/rest/v1/profiles?select=id&limit=1"
