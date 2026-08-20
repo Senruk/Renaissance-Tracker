@@ -1,5 +1,33 @@
-node_modules
-dist
-.env
-.DS_Store
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
 *.local
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+
+# Misc
+*.tgz
+.cache/
