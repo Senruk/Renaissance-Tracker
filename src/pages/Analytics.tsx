@@ -29,7 +29,7 @@ export default function Analytics() {
       .order('date')
       .then(({ data }) => {
         const grouped: Record<string, number> = {}
-        data?.forEach(l => { grouped[l.date] = (grouped[l.date] || 0) + l.amount_ml })
+        data?.forEach((l: any) => { grouped[l.date] = (grouped[l.date] || 0) + l.amount_ml })
         const days = []
         for (let i = 6; i >= 0; i--) {
           const d = new Date(); d.setDate(d.getDate() - i)
@@ -48,7 +48,7 @@ export default function Analytics() {
       .order('date')
       .then(({ data }) => {
         const byDate: Record<string, number[]> = {}
-        data?.forEach(l => {
+        data?.forEach((l: any) => {
           if (!byDate[l.date]) byDate[l.date] = []
           byDate[l.date].push(l.mood_score)
         })

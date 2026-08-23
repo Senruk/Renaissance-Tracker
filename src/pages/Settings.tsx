@@ -28,8 +28,14 @@ export default function Settings() {
   async function handleDeleteAccount() {
     if (!confirm('Are you sure? This will delete all your data.')) return
     if (!confirm('This cannot be undone. Continue?')) return
+    // Clear all local data for the user
+    const tables = ['profiles', 'habits', 'habit_logs', 'water_logs', 'mood_logs',
+      'tasks', 'time_logs', 'workout_logs', 'health_logs', 'quest_progress',
+      'focus_sessions', 'leads', 'call_logs', 'xp_logs']
+    for (const t of tables) {
+      await supabase.from(t).delete().eq('user_id', user?.id)
+    }
     await supabase.from('profiles').delete().eq('id', user?.id)
-    await supabase.auth.admin.deleteUser(user?.id || '')
     await signOut()
   }
 

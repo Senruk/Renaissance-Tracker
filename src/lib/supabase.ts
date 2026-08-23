@@ -95,7 +95,7 @@ async function execLocal(
     const nextId = rows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1
     const inserted: any[] = []
     for (const entry of entries) {
-      const row = { ...stamp(entry), user_id: entry.user_id ?? 'local' }
+      const row = { ...stamp(entry, table), user_id: entry.user_id ?? 'local' }
       if (row.id === undefined) row.id = nextId
       if (row.created_at === undefined) row.created_at = nowIso()
       rows.push(row)
@@ -118,7 +118,7 @@ async function execLocal(
   if (op === 'UPDATE') {
     for (const r of rows) {
       if (matches(r, filters)) {
-        const upd = stamp(data)
+        const upd = stamp(data, table)
         for (const k of Object.keys(upd)) r[k] = upd[k]
       }
     }
@@ -214,6 +214,7 @@ class Builder {
   }
 
   select(...cols: string[]) {
+    void cols  // cols accepted for Supabase API parity; not used in local engine
     this.op = 'SELECT'
     return this
   }
@@ -238,7 +239,7 @@ class Builder {
   gte(col: string, value: any) { this.filters.push({ col, op: 'gte', value }); return this }
   lt(col: string, value: any) { this.filters.push({ col, op: 'lt', value }); return this }
   lte(col: string, value: any) { this.filters.push({ col, op: 'lte', value }); return this }
-  order(col: string, opts?: { ascending?: boolean }) {
+  orderBy(col: string, opts?: { ascending?: boolean }) {
     this.order = { col, direction: opts?.ascending === false ? 'desc' : 'asc' }
     return this
   }

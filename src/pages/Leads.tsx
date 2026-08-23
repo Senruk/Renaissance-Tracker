@@ -81,7 +81,7 @@ export default function Leads() {
       // Count today's calls
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      setTodayCalls(logRes.data.filter(l => new Date(l.created_at) >= today).length)
+      setTodayCalls(logRes.data.filter((l: any) => new Date(l.created_at) >= today).length)
     }
     setLoading(false)
   }
