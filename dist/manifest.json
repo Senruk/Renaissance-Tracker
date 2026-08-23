@@ -1,0 +1,9 @@
+{
+  "name": "Renaissance",
+  "short_name": "Renaissance",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#0a0a1a",
+  "description": "Your daily life tracker with XP, habits, 3D gym tracking, and AI insights"
+}
