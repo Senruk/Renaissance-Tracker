@@ -31,3 +31,10 @@ coverage/
 # Misc
 *.tgz
 .cache/
+
+# Claude Code / tooling infrastructure
+.claude/
+.superpowers/
+.agents/
+.mcp.json
+.jarvis_memory.db
