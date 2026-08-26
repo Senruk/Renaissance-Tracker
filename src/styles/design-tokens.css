@@ -1,0 +1,265 @@
+/* Renaissance Tracker - Luxury Design Tokens */
+/* Sophisticated, expensive-looking aesthetic to replace neon cyberpunk */
+
+/* Color Palette - Luxurious & Professional */
+:root {
+  /* Background Colors - Warm dark instead of pure black */
+  --color-bg-primary: #0A0A0A;      /* Warm dark charcoal - NOT pure black */
+  --color-bg-secondary: #121212;    /* Slightly lighter for containers/cards */
+  --color-bg-tertiary: #1E1E1E;     /* For elevated surfaces */
+
+  /* Text Colors */
+  --color-text-primary: #FFFFFF;    /* Clean white */
+  --color-text-secondary: #E0E0E0;  /* Soft gray */
+  --color-text-tertiary: #B0B0B0;   /* Muted text */
+  --color-text-on-accent: #000000;  /* Text on accent colors */
+
+  /* Accent Colors - Precious Metals (replacing neon colors) */
+  --color-accent-gold: #D4AF37;     /* Precious gold - replaces neon cyan */
+  --color-accent-amber: #FFBF00;    /* Warm amber - replaces neon purple/pink */
+  --color-accent-copper: #B87333;   /* Muted copper - replaces neon green */
+  --color-accent-silver: #C0C0C0;   /* Subtle silver */
+
+  /* Status Colors (keeping functional but refining) */
+  --color-success: #4CAF50;
+  --color-warning: #FF9800;
+  --color-error: #F44336;
+  --color-info: #2196F3;
+
+  /* Glassmorphism - Refined and subtle */
+  --color-glass-bg: rgba(18, 18, 18, 0.6);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-strong-bg: rgba(18, 18, 18, 0.8);
+  --color-glass-strong-border: rgba(255, 255, 255, 0.12);
+
+  /* Elevation & Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --shadow-xl: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Border Radius */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  /* Spacing System (8px base for consistency) */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Typography */
+  --font-sans: 'Inter var', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: 'Fira Code', 'Courier New', monospace;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Font Sizes (Modular Scale 1.25) */
+  --font-size-xs: 0.65rem;   /* 10.4px */
+  --font-size-sm: 0.8rem;    /* 12.8px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-lg: 1.25rem;   /* 20px */
+  --font-size-xl: 1.56rem;   /* 25px */
+  --font-size-2xl: 1.95rem;  /* 31.2px */
+  --font-size-3xl: 2.44rem;  /* 39px */
+  --font-size-4xl: 3.05rem;  /* 48.8px */
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-loose: 1.75;
+
+  /* Opacity */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-100: 1;
+}
+
+/* Dark Theme - Already dark, just refine */
+.dark {
+  --color-bg-primary: #0A0A0A;
+  --color-bg-secondary: #121212;
+  --color-bg-tertiary: #1E1E1E;
+
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #E0E0E0;
+  --color-text-tertiary: #B0B0B0;
+}
+
+/* Utility Classes for Luxury Design */
+.glass-luxury {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.glass-luxury:hover {
+  background: var(--color-glass-strong-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-color: rgba(255, 255, 255, 0.12);
+  transition: all var(--transition-normal);
+}
+
+.glass-luxury-strong {
+  background: var(--color-glass-strong-bg);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--color-glass-strong-border);
+  border-radius: var(--radius-lg);
+}
+
+.accent-gold {
+  background: var(--color-accent-gold);
+  color: var(--color-text-on-accent);
+}
+
+.accent-gold:hover {
+  background: var(--color-accent-amber);
+  transition: background-color var(--transition-normal);
+}
+
+.accent-amber {
+  background: var(--color-accent-amber);
+  color: var(--color-text-on-accent);
+}
+
+.accent-amber:hover {
+  background: var(--color-accent-gold);
+  transition: background-color var(--transition-normal);
+}
+
+.accent-copper {
+  background: var(--color-accent-copper);
+  color: var(--color-text-on-accent);
+}
+
+.accent-copper:hover {
+  background: var(--color-accent-gold);
+  transition: background-color var(--transition-normal);
+}
+
+.border-luxury {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.shadow-luxury {
+  box-shadow: var(--shadow-lg);
+  transition: box-shadow var(--transition-normal);
+}
+
+.shadow-luxury:hover {
+  box-shadow: var(--shadow-xl);
+}
+
+.transition-luxury {
+  transition: all var(--transition-normal);
+}
+
+.hover-lift {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.hover-scale {
+  transition: transform var(--transition-normal);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.text-luxury {
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+.text-luxury-muted {
+  color: var(--color-text-tertiary);
+  font-family: var(--font-sans);
+}
+
+.text-luxury-accent {
+  color: var(--color-accent-gold);
+  font-weight: var(--font-weight-medium);
+}
+
+.container-luxury {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.section-luxury {
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+
+.card-luxury {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-normal);
+}
+
+.card-luxury:hover {
+  background: var(--color-glass-strong-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+/* Dark Theme Specific Utilities */
+.dark .glass-luxury {
+  background: var(--color-glass-bg);
+}
+
+.dark .glass-luxury:hover {
+  background: var(--color-glass-strong-bg);
+}

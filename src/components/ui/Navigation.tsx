@@ -16,20 +16,26 @@ export default function Navigation() {
   const location = useLocation()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-white/5 safe-area-bottom">
-      <div className="max-w-lg mx-auto flex justify-around items-center py-2 px-1">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-luxury-strong border-t border-white/10 safe-area-bottom backdrop-blur-sm">
+      <div className="max-w-lg mx-auto flex justify-around items-center py-3 px-2">
         {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
           const active = location.pathname === path
           return (
             <button
               key={path}
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all ${
-                active ? 'text-neon-cyan scale-110' : 'text-white/40 hover:text-white/70'
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-luxury hover-lift ${
+                active
+                  ? 'bg-bg-secondary/80 accent-gold text-text-on-accent shadow-lg'
+                  : 'text-text-secondary/60 hover:text-text-primary hover:bg-bg-secondary/20'
               }`}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
-              <span className="text-[10px] font-medium">{label}</span>
+              <Icon
+                size={20}
+                strokeWidth={active ? 2 : 1.5}
+                className={`${active ? 'text-accent-gold' : 'text-text-tertiary'}`}
+              />
+              <span className="text-xs font-medium">{label}</span>
             </button>
           )
         })}

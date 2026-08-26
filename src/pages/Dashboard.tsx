@@ -74,45 +74,45 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-text-primary">
             Hey, {profile?.username || 'User'} 👋
           </h1>
-          <p className="text-xs text-white/40">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+          <p className="text-xs text-text-secondary/60">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold neon-text">{profile?.xp || 0}</div>
-          <div className="text-[10px] text-white/40 uppercase tracking-wider">Total XP</div>
+          <div className="text-3xl font-bold text-accent-gold">{profile?.xp || 0}</div>
+          <div className="text-[10px] text-text-secondary/60 uppercase tracking-wider">Total XP</div>
         </div>
       </div>
 
       {/* XP Bar */}
-      <GlassCard>
+      <GlassCard className="glass-luxury">
         <XPBar xp={profile?.xp || 0} level={profile?.level || 1} />
       </GlassCard>
 
       {/* Streak */}
-      <GlassCard>
+      <GlassCard className="glass-luxury">
         <StreakCounter streak={profile?.streak || 0} maxStreak={profile?.max_streak || 0} streakFreeze={profile?.streak_freeze || 0} todayLogged={todayLogged} />
       </GlassCard>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <GlassCard className="text-center">
-          <div className="text-2xl font-bold text-neon-purple">{activeHabits}</div>
-          <div className="text-[10px] text-white/40 uppercase tracking-wider">Habits</div>
+      <div className="grid grid-cols-3 gap-4">
+        <GlassCard className="glass-luxury text-center">
+          <div className="text-2xl font-bold text-accent-amber">{activeHabits}</div>
+          <div className="text-[10px] text-text-secondary/60 uppercase tracking-wider">Habits</div>
         </GlassCard>
-        <GlassCard className="text-center">
-          <div className="text-2xl font-bold text-neon-green">{completedTasks}</div>
-          <div className="text-[10px] text-white/40 uppercase tracking-wider">Done</div>
+        <GlassCard className="glass-luxury text-center">
+          <div className="text-2xl font-bold text-accent-copper">{completedTasks}</div>
+          <div className="text-[10px] text-text-secondary/60 uppercase tracking-wider">Done</div>
         </GlassCard>
-        <GlassCard className="text-center">
-          <div className="text-2xl font-bold text-neon-pink">{todayFocus}m</div>
-          <div className="text-[10px] text-white/40 uppercase tracking-wider">Focus</div>
+        <GlassCard className="glass-luxury text-center">
+          <div className="text-2xl font-bold text-text-primary">{todayFocus}m</div>
+          <div className="text-[10px] text-text-secondary/60 uppercase tracking-wider">Focus</div>
         </GlassCard>
       </div>
 
       {/* Mood */}
-      <GlassCard>
+      <GlassCard className="glass-luxury">
         <MoodSelector currentMood={todayMood} onSelect={handleMoodSelect} />
         <input
           type="text"
@@ -120,38 +120,38 @@ export default function Dashboard() {
           onChange={(e) => setNote(e.target.value)}
           onBlur={async () => { if (todayMood) await supabase.from('mood_logs').update({ note }).eq('id', todayMood.id) }}
           placeholder="Add a note..."
-          className="w-full mt-2 bg-white/5 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white/60 outline-none focus:border-white/10"
+          className="w-full mt-4 bg-bg-secondary/80 border border-white/10 rounded-lg px-4 py-2 text-text-primary/90 outline-none focus:border-white/20 focus:ring-2 focus:ring-accent-gold/20"
         />
       </GlassCard>
 
       {/* Water */}
-      <GlassCard>
+      <GlassCard className="glass-luxury">
         <WaterTracker currentMl={todayWater} onAdd={handleWaterAdd} />
       </GlassCard>
 
       {/* Focus Timer */}
-      <GlassCard>
+      <GlassCard className="glass-luxury">
         <div className="flex items-center gap-3 mb-3">
-          <Brain size={16} className="text-neon-purple" />
-          <span className="text-xs text-white/40 uppercase tracking-wider font-medium">Focus Timer</span>
+          <Brain size={16} className="text-accent-amber" />
+          <span className="text-xs font-medium text-text-secondary/60 uppercase tracking-wider">Focus Timer</span>
         </div>
         <div className="text-center">
-          <div className="text-4xl font-bold text-white mb-2">
+          <div className="text-4xl font-bold text-text-primary mb-3">
             {Math.floor(focusSeconds / 60)}:{(focusSeconds % 60).toString().padStart(2, '0')}
           </div>
           {!focusActive ? (
-            <div className="flex gap-2 justify-center">
+            <div className="flex gap-3 justify-center">
               {[15, 25, 45].map(m => (
-                <button key={m} onClick={() => setFocusMinutes(m)} className={`px-3 py-1 rounded-lg text-xs transition-colors ${focusMinutes === m ? 'bg-neon-purple/20 text-neon-purple border border-neon-purple/30' : 'bg-white/5 text-white/40 border border-white/5'}`}>
+                <button key={m} onClick={() => setFocusMinutes(m)} className={`px-4 py-2 rounded-lg text-text-secondary/60 transition-colors hover:bg-bg-secondary/20 ${focusMinutes === m ? 'bg-bg-secondary/60 text-text-primary' : 'hover:text-text-primary'}`}>
                   {m}m
                 </button>
               ))}
-              <button onClick={handleStartFocus} className="px-4 py-1 rounded-lg text-xs bg-neon-purple/20 text-neon-purple border border-neon-purple/30 font-medium hover:bg-neon-purple/30 transition-colors">
+              <button onClick={handleStartFocus} className="px-4 py-2 rounded-lg bg-accent-gold/20 text-accent-gold border border-accent-gold/30 font-medium hover:bg-accent-gold/30 transition-colors hover-lift">
                 Start
               </button>
             </div>
           ) : (
-            <button onClick={() => setFocusActive(false)} className="px-4 py-1 rounded-lg text-xs bg-red-400/20 text-red-400 border border-red-400/30">
+            <button onClick={() => setFocusActive(false)} className="px-4 py-2 rounded-lg bg-red-500/20 text-red-500 border border-red-500/30 hover:bg-red-500/30 transition-colors hover-lift">
               Stop
             </button>
           )}
@@ -159,16 +159,16 @@ export default function Dashboard() {
       </GlassCard>
 
       {/* Daily Note */}
-      <GlassCard>
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles size={14} className="text-neon-cyan" />
-          <span className="text-xs text-white/40 uppercase tracking-wider font-medium">Daily Note</span>
+      <GlassCard className="glass-luxury">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles size={14} className="text-accent-gold" />
+          <span className="text-xs font-medium text-text-secondary/60 uppercase tracking-wider">Daily Note</span>
         </div>
         <textarea
           value={dailyNote}
           onChange={(e) => setDailyNote(e.target.value)}
           placeholder="What's on your mind today?"
-          className="w-full bg-white/5 border border-white/5 rounded-lg p-3 text-sm text-white/60 outline-none focus:border-white/10 resize-none h-20"
+          className="w-full bg-bg-secondary/80 border border-white/10 rounded-lg px-4 py-2 text-text-primary/90 outline-none focus:border-white/20 focus:ring-2 focus:ring-accent-gold/20 resize-none h-24"
         />
       </GlassCard>
     </motion.div>

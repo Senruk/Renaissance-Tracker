@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabase-enhanced'
 import GlassCard from '../components/ui/GlassCard'
 import { motion } from 'framer-motion'
 import { LogOut, User, Palette, Shield, Trash2 } from 'lucide-react'

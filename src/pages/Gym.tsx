@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useData } from '../hooks/useData'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabase-enhanced'
 import { XP, MUSCLE_GROUPS } from '../lib/constants'
 import GlassCard from '../components/ui/GlassCard'
 import BodyDiagram from '../components/3d/BodyDiagram'

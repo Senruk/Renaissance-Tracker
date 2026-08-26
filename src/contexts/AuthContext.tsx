@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabase-enhanced'
 
 export interface Profile {
   id?: string

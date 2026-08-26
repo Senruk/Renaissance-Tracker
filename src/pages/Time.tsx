@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useData } from '../hooks/useData'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabase-enhanced'
 import GlassCard from '../components/ui/GlassCard'
 import { motion } from 'framer-motion'
 import { Play, Square, List } from 'lucide-react'

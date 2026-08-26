@@ -4,14 +4,15 @@ interface Props {
   children: ReactNode
   className?: string
   glow?: boolean
+  strong?: boolean
   onClick?: () => void
 }
 
-export default function GlassCard({ children, className = '', glow = false, onClick }: Props) {
+export default function GlassCard({ children, className = '', glow = false, strong = false, onClick }: Props) {
   return (
     <div
       onClick={onClick}
-      className={`glass p-4 ${glow ? 'neon-glow' : ''} ${onClick ? 'cursor-pointer hover:scale-[1.02] transition-transform' : ''} ${className}`}
+      className={`${strong ? 'glass-luxury-strong' : 'glass-luxury'} p-4 ${glow ? 'shadow-luxury' : ''} ${onClick ? 'hover-lift hover-scale transition-luxury cursor-pointer' : ''} ${className}`}
     >
       {children}
     </div>

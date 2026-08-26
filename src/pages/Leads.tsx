@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabase-enhanced'
 import GlassCard from '../components/ui/GlassCard'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Phone, Plus, X, Building2, User, MessageSquare, Globe, PhoneCall, CheckCircle2 } from 'lucide-react'
