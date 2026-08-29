@@ -1,4 +1,4 @@
-import type { SupabaseResult, SupabaseClient } from './db-types'
+import type { SupabaseResult, SupabaseClient, SupabaseQueryBuilder } from './db-types'
 import { supabase as originalSupabase } from './supabase'
 
 // Enhanced Supabase client with improved offline persistence and sync capabilities
@@ -6,13 +6,12 @@ import { supabase as originalSupabase } from './supabase'
 
 // Configuration
 const SYNC_INTERVAL = 30000 // 30 seconds
-const MAX_OFFLINE_QUEUE = 1000
 
 // Enhanced client that queues operations when offline and syncs when online
 export class EnhancedSupabaseClient implements SupabaseClient {
   private readonly original: SupabaseClient
   private isOnline: boolean = true
-  private syncIntervalId: NodeJS.Timeout | null = null
+  private syncIntervalId: ReturnType<typeof setInterval> | null = null
   private operationQueue: Array<{
     table: string
     op: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE'
@@ -137,7 +136,7 @@ export class EnhancedSupabaseClient implements SupabaseClient {
 
       // Apply ordering
       if (operation.order) {
-        query = query.orderBy(operation.order.col, {
+        query = query.order(operation.order.col, {
           ascending: operation.order.direction === 'asc'
         })
       }
@@ -187,7 +186,7 @@ export class EnhancedSupabaseClient implements SupabaseClient {
 
     // Apply ordering
     if (operation.order) {
-      query = query.orderBy(operation.order.col, {
+      query = query.order(operation.order.col, {
         ascending: operation.order.direction === 'asc'
       })
     }
@@ -239,123 +238,73 @@ export class EnhancedSupabaseClient implements SupabaseClient {
   }
 
   // Proxy all methods to the original client with enhanced queuing
-  from(table: string) {
-    return {
-      select: (...cols: string[]) => {
-        return this.enhancedBuilder(table, 'SELECT', cols)
-      },
-      insert: (rows: any | any[]) => {
-        return this.enhancedBuilder(table, 'INSERT', undefined, rows)
-      },
-      update: (obj: any) => {
-        return this.enhancedBuilder(table, 'UPDATE', obj)
-      },
-      delete: () => {
-        return this.enhancedBuilder(table, 'DELETE')
-      }
-    }
+  from(table: string): SupabaseQueryBuilder {
+    const baseBuilder = this.original.from(table)
+    return this.wrapBuilderMethods(baseBuilder, table, 'SELECT')
   }
 
-  private enhancedBuilder(
+  private wrapBuilderMethods(
+    builder: SupabaseQueryBuilder,
     table: string,
     op: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE',
-    cols: string[] | undefined = undefined,
-    data: any = null
-  ) {
+    _cols?: string[],
+    _data?: any
+  ): SupabaseQueryBuilder {
     return {
-      eq: (col: string, value: any) => this.addFilterAndReturn(this.eq.bind(this), table, op, cols, data, col, 'eq', value),
-      neq: (col: string, value: any) => this.addFilterAndReturn(this.neq.bind(this), table, op, cols, data, col, 'neq', value),
-      gt: (col: string, value: any) => this.addFilterAndReturn(this.gt.bind(this), table, op, cols, data, col, 'gt', value),
-      gte: (col: string, value: any) => this.addFilterAndReturn(this.gte.bind(this), table, op, cols, data, col, 'gte', value),
-      lt: (col: string, value: any) => this.addFilterAndReturn(this.lt.bind(this), table, op, cols, data, col, 'lt', value),
-      lte: (col: string, value: any) => this.addFilterAndReturn(this.lte.bind(this), table, op, cols, data, col, 'lte', value),
-      in: (col: string, values: any[]) => this.addFilterAndReturn(this.in.bind(this), table, op, cols, data, col, 'in', values),
-      orderBy: (col: string, opts?: { ascending?: boolean }) => this.addOrderAndReturn(this.orderBy.bind(this), table, op, cols, data, col, opts),
-      limit: (n: number) => this.addLimitAndReturn(this.limit.bind(this), table, op, cols, data, n),
-      single: () => this.addSingleAndReturn(this.single.bind(this), table, op, cols, data),
+      select: (...cols: string[]) => this.wrapBuilderMethods(builder.select(...cols), table, 'SELECT', cols, _data),
+      insert: (rows: any | any[]) => this.wrapBuilderMethods(builder.insert(rows), table, 'INSERT', _cols, rows),
+      update: (obj: any) => this.wrapBuilderMethods(builder.update(obj), table, 'UPDATE', _cols, obj),
+      delete: () => this.wrapBuilderMethods(builder.delete(), table, 'DELETE', _cols, _data),
+      eq: (col: string, value: any) => this.wrapBuilderMethods(builder.eq(col, value), table, op, _cols, _data),
+      neq: (col: string, value: any) => this.wrapBuilderMethods(builder.neq(col, value), table, op, _cols, _data),
+      in: (col: string, values: any[]) => this.wrapBuilderMethods(builder.in(col, values), table, op, _cols, _data),
+      gt: (col: string, value: any) => this.wrapBuilderMethods(builder.gt(col, value), table, op, _cols, _data),
+      gte: (col: string, value: any) => this.wrapBuilderMethods(builder.gte(col, value), table, op, _cols, _data),
+      lt: (col: string, value: any) => this.wrapBuilderMethods(builder.lt(col, value), table, op, _cols, _data),
+      lte: (col: string, value: any) => this.wrapBuilderMethods(builder.lte(col, value), table, op, _cols, _data),
+      order: (col: string, opts?: { ascending?: boolean }) => this.wrapBuilderMethods(builder.order(col, opts), table, op, _cols, _data),
+      limit: (n: number) => this.wrapBuilderMethods(builder.limit(n), table, op, _cols, _data),
+      single: () => this.wrapBuilderMethods(builder.single(), table, op, _cols, _data),
       then: (onfulfilled?: any, onrejected?: any) => {
-        return this.buildQuery(table, op, cols, data).then(onfulfilled, onrejected)
+        // When .then() is called, execute the query with offline support
+        return this.executeWithQueue(table, op, builder, _cols, _data).then(onfulfilled, onrejected)
       }
     }
   }
 
-  private addFilterAndReturn(
-    fn: (table: string, op: string, col: string, value: any, tableParam: string, opParam: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE', cols: string[] | undefined, data: any, colParam: string, opParam2: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'in', valueParam: any) => any,
-    tableParam: string,
-    opParam: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE',
-    cols: string[] | undefined,
-    data: any,
-    colParam: string,
-    opParam2: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'in',
-    valueParam: any
-  ) {
-    const result = fn(tableParam, opParam, colParam, valueParam, tableParam, opParam, cols, data, colParam, opParam2, valueParam)
-    return result
-  }
-
-  private addOrderAndReturn(
-    fn: (table: string, op: string, col: string, opts: { ascending?: boolean } | undefined, tableParam: string, opParam: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE', cols: string[] | undefined, data: any, colParam: string, optsParam: { ascending?: boolean }) => any,
-    tableParam: string,
-    opParam: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE',
-    cols: string[] | undefined,
-    data: any,
-    colParam: string,
-    optsParam: { ascending?: boolean }
-  ) {
-    const result = fn(tableParam, opParam, colParam, optsParam, tableParam, opParam, cols, data, colParam, optsParam)
-    return result
-  }
-
-  private addLimitAndReturn(
-    fn: (table: string, op: string, limit: number, tableParam: string, opParam: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE', cols: string[] | undefined, data: any, limitParam: number) => any,
-    tableParam: string,
-    opParam: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE',
-    cols: string[] | undefined,
-    data: any,
-    limitParam: number
-  ) {
-    return fn(tableParam, opParam, limitParam, tableParam, opParam, cols, data, limitParam)
-  }
-
-  private addSingleAndReturn(
-    fn: (table: string, op: string, tableParam: string, opParam: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE', cols: string[] | undefined, data: any) => any,
-    tableParam: string,
-    opParam: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE',
-    cols: string[] | undefined,
-    data: any
-  ) {
-    return fn(tableParam, opParam, tableParam, opParam, cols, data)
-  }
-
-  private buildQuery(
+  private async executeWithQueue(
     table: string,
     op: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE',
-    cols: string[] | undefined,
+    builder: SupabaseQueryBuilder,
+    _cols: string[] | undefined,
     data: any
-  ) {
-    return new Promise<SupabaseResult>((resolve, reject) => {
-      this.operationQueue.push({
-        table,
-        op,
-        filters: [], // Filters would be captured in a real implementation
-        data,
-        order: undefined,
-        limit: undefined,
-        single: undefined,
-        timestamp: Date.now(),
-        resolve,
-        reject
-      })
+  ): Promise<SupabaseResult> {
+    // For SELECT operations, just execute immediately
+    if (op === 'SELECT') {
+      return await builder
+    }
 
-      this.saveOperationQueue()
-
-      // If online, try to process immediately
-      if (this.isOnline) {
-        this.processOperationQueue().catch(() => {
-          // If processing fails, keep in queue for retry
+    // For mutating operations, queue if offline
+    if (!this.isOnline) {
+      return new Promise<SupabaseResult>((resolve, reject) => {
+        this.operationQueue.push({
+          table,
+          op,
+          filters: [], // Filters would need to be extracted from builder in real impl
+          data,
+          order: undefined,
+          limit: undefined,
+          single: undefined,
+          timestamp: Date.now(),
+          resolve,
+          reject
         })
-      }
-    })
+        this.saveOperationQueue()
+      })
+    }
+
+    // Online - execute directly
+    return await builder
   }
 
   // Properties to match original client interface

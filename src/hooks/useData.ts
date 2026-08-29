@@ -12,6 +12,12 @@ interface UserData {
   workout_logs: any[]
   quest_progress: any[]
   focus_sessions: any[]
+  meal_logs: any[]
+  work_sessions: any[]
+  break_logs: any[]
+  skill_progress: any[]
+  skill_sessions: any[]
+  income_logs: any[]
 }
 
 export function useData() {
@@ -26,6 +32,12 @@ export function useData() {
     workout_logs: [],
     quest_progress: [],
     focus_sessions: [],
+    meal_logs: [],
+    work_sessions: [],
+    break_logs: [],
+    skill_progress: [],
+    skill_sessions: [],
+    income_logs: [],
   })
   const [today, setToday] = useState(new Date().toISOString().split('T')[0])
 
@@ -34,7 +46,7 @@ export function useData() {
     const todayStr = new Date().toISOString().split('T')[0]
     setToday(todayStr)
 
-    const [habits, habit_logs, water, mood, tasks, time, workouts, quests, focus] = await Promise.all([
+    const [habits, habit_logs, water, mood, tasks, time, workouts, quests, focus, meals, work, breaks, skills, skillSessions, income] = await Promise.all([
       supabase.from('habits').select('*').eq('user_id', user.id).order('created_at'),
       supabase.from('habit_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
       supabase.from('water_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
@@ -44,6 +56,12 @@ export function useData() {
       supabase.from('workout_logs').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(30),
       supabase.from('quest_progress').select('*').eq('user_id', user.id).eq('date', todayStr),
       supabase.from('focus_sessions').select('*').eq('user_id', user.id).eq('date', todayStr),
+      supabase.from('meal_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
+      supabase.from('work_sessions').select('*').eq('user_id', user.id).eq('date', todayStr),
+      supabase.from('break_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
+      supabase.from('skill_progress').select('*').eq('user_id', user.id),
+      supabase.from('skill_sessions').select('*').eq('user_id', user.id).eq('date', todayStr),
+      supabase.from('income_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
     ])
 
     setData({
@@ -56,6 +74,12 @@ export function useData() {
       workout_logs: workouts.data || [],
       quest_progress: quests.data || [],
       focus_sessions: focus.data || [],
+      meal_logs: meals.data || [],
+      work_sessions: work.data || [],
+      break_logs: breaks.data || [],
+      skill_progress: skills.data || [],
+      skill_sessions: skillSessions.data || [],
+      income_logs: income.data || [],
     })
   }, [user])
 

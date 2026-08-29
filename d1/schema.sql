@@ -159,6 +159,78 @@ create table if not exists xp_logs (
 );
 
 -- ============================================
+-- BODY / CAREER PAGE TABLES (tmp merge)
+-- ============================================
+
+-- 15. MEAL LOGS (Body > Meals tab)
+create table if not exists meal_logs (
+  id integer primary key autoincrement,
+  user_id text default 'local',
+  date text not null default (date('now')),
+  name text not null,
+  calories integer default 0,
+  protein_g integer default 0,
+  carbs_g integer default 0,
+  fat_g integer default 0,
+  created_at text default (datetime('now'))
+);
+
+-- 16. WORK SESSIONS (Body > Work tab)
+create table if not exists work_sessions (
+  id integer primary key autoincrement,
+  user_id text default 'local',
+  date text not null default (date('now')),
+  task_name text not null,
+  total_minutes integer not null,
+  category text default 'focused',
+  created_at text default (datetime('now'))
+);
+
+-- 17. BREAK LOGS
+create table if not exists break_logs (
+  id integer primary key autoincrement,
+  user_id text default 'local',
+  date text not null default (date('now')),
+  start_time text,
+  duration integer default 0,
+  created_at text default (datetime('now'))
+);
+
+-- 18. SKILL PROGRESS (Career page skill tree)
+create table if not exists skill_progress (
+  id integer primary key autoincrement,
+  user_id text default 'local',
+  skill_id text not null,
+  skill_name text,
+  xp integer default 0,
+  level integer default 1,
+  category text,
+  created_at text default (datetime('now')),
+  updated_at text default (datetime('now'))
+);
+
+-- 19. SKILL SESSIONS (Career timer logs)
+create table if not exists skill_sessions (
+  id integer primary key autoincrement,
+  user_id text default 'local',
+  date text not null default (date('now')),
+  skill_id text,
+  skill_name text,
+  duration_min integer not null,
+  created_at text default (datetime('now'))
+);
+
+-- 20. INCOME LOGS (Career income tracker)
+create table if not exists income_logs (
+  id integer primary key autoincrement,
+  user_id text default 'local',
+  date text not null default (date('now')),
+  amount numeric not null,
+  source text not null,
+  created_at text default (datetime('now'))
+);
+
+-- ============================================
 -- LOCK-IN DOMAINS (↑ money-first)
 -- ============================================
 
@@ -228,6 +300,10 @@ create index if not exists idx_mood_logs_date on mood_logs(date);
 create index if not exists idx_time_logs_date on time_logs(date);
 create index if not exists idx_workout_logs_date on workout_logs(date);
 create index if not exists idx_health_logs_date on health_logs(date);
+create index if not exists idx_meal_logs_date on meal_logs(date);
+create index if not exists idx_work_sessions_date on work_sessions(date);
+create index if not exists idx_skill_sessions_date on skill_sessions(date);
+create index if not exists idx_income_logs_date on income_logs(date);
 create index if not exists idx_outreach_date on outreach(date);
 create index if not exists idx_demo_date on demo(date);
 create index if not exists idx_deal_date on deal(date);

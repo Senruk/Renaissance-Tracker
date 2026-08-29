@@ -5,12 +5,11 @@ import Navigation from './components/ui/Navigation'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Habits from './pages/Habits'
-import Health from './pages/Health'
-import Gym from './pages/Gym'
-import TimePage from './pages/Time'
+import Body from './pages/Body'
+import Coach from './pages/Coach'
+import Leads from './pages/Leads'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
-import Leads from './pages/Leads'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -34,9 +33,8 @@ function AppRoutes() {
           <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/habits" element={<ProtectedRoute><Habits /></ProtectedRoute>} />
-          <Route path="/health" element={<ProtectedRoute><Health /></ProtectedRoute>} />
-          <Route path="/gym" element={<ProtectedRoute><Gym /></ProtectedRoute>} />
-          <Route path="/time" element={<ProtectedRoute><TimePage /></ProtectedRoute>} />
+          <Route path="/body" element={<ProtectedRoute><Body /></ProtectedRoute>} />
+          <Route path="/coach" element={<ProtectedRoute><Coach /></ProtectedRoute>} />
           <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

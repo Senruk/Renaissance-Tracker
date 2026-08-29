@@ -1,5 +1,12 @@
 {
   "name": "renaissance-tracker",
   "pages_build_output_dir": "dist",
-  "compatibility_date": "2025-01-01"
+  "compatibility_date": "2025-01-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "renaissance-db",
+      "database_id": "90e93152-b14b-43d5-b67e-d47388184693"
+    }
+  ]
 }

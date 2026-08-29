@@ -35,13 +35,8 @@ body {
 }
 
 /* Utility classes - kept for backward compatibility during transition */
-.glass {
-  @apply glass-luxury;
-}
-
-.glass-strong {
-  @apply glass-luxury-strong;
-}
+/* Note: Tailwind v4 doesn't support @apply for custom classes */
+/* Use the actual classes (glass-luxury, glass-luxury-strong) directly in components */
 
 .neon-glow {
   /* This will be replaced - keeping for now */
@@ -81,140 +76,6 @@ body {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
-}
-
-/* Luxury utility classes - to be used going forward */
-.glass-luxury {
-  background: var(--color-glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--color-glass-border);
-  border-radius: var(--radius-lg);
-}
-
-.glass-luxury:hover {
-  background: var(--color-glass-strong-bg);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border-color: rgba(255, 255, 255, 0.12);
-  transition: all var(--transition-normal);
-}
-
-.glass-luxury-strong {
-  background: var(--color-glass-strong-bg);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid var(--color-glass-strong-border);
-  border-radius: var(--radius-lg);
-}
-
-.accent-gold {
-  background: var(--color-accent-gold);
-  color: var(--color-text-on-accent);
-}
-
-.accent-gold:hover {
-  background: var(--color-accent-amber);
-  transition: background-color var(--transition-normal);
-}
-
-.accent-amber {
-  background: var(--color-accent-amber);
-  color: var(--color-text-on-accent);
-}
-
-.accent-amber:hover {
-  background: var(--color-accent-gold);
-  transition: background-color var(--transition-normal);
-}
-
-.accent-copper {
-  background: var(--color-accent-copper);
-  color: var(--color-text-on-accent);
-}
-
-.accent-copper:hover {
-  background: var(--color-accent-gold);
-  transition: background-color var(--transition-normal);
-}
-
-.border-luxury {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.shadow-luxury {
-  box-shadow: var(--shadow-lg);
-  transition: box-shadow var(--transition-normal);
-}
-
-.shadow-luxury:hover {
-  box-shadow: var(--shadow-xl);
-}
-
-.transition-luxury {
-  transition: all var(--transition-normal);
-}
-
-.hover-lift {
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-}
-
-.hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.hover-scale {
-  transition: transform var(--transition-normal);
-}
-
-.hover-scale:hover {
-  transform: scale(1.02);
-}
-
-.text-luxury {
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-}
-
-.text-luxury-muted {
-  color: var(--color-text-tertiary);
-  font-family: var(--font-sans);
-}
-
-.text-luxury-accent {
-  color: var(--color-accent-gold);
-  font-weight: var(--font-weight-medium);
-}
-
-.container-luxury {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--space-4);
-}
-
-.section-luxury {
-  padding-top: var(--space-16);
-  padding-bottom: var(--space-16);
-}
-
-.card-luxury {
-  background: var(--color-glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--color-glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  transition: all var(--transition-normal);
-}
-
-.card-luxury:hover {
-  background: var(--color-glass-strong-bg);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-2px);
 }
 
 /* Dark Theme Specific Utilities */
