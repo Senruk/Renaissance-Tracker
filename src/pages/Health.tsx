@@ -21,7 +21,7 @@ export default function Health() {
       await supabase.from('mood_logs').update({ mood_score: value }).eq('id', todayMood.id)
     } else {
       await supabase.from('mood_logs').insert({ user_id: user?.id, date: today, mood_score: value })
-      addXP(XP.MOOD_LOG, 'mood_log')
+      await addXP(XP.MOOD_LOG, 'mood_log')
     }
     await refresh()
   }
@@ -29,7 +29,7 @@ export default function Health() {
   async function handleWaterAdd(amount: number) {
     if (amount > 0) {
       await supabase.from('water_logs').insert({ user_id: user?.id, date: today, amount_ml: amount })
-      if (todayWater + amount >= 2000) addXP(XP.WATER_GOAL, 'water_goal')
+      if (todayWater + amount >= 2000) await addXP(XP.WATER_GOAL, 'water_goal')
     } else {
       const last = data.water_logs[data.water_logs.length - 1]
       if (last) await supabase.from('water_logs').delete().eq('id', last.id)
@@ -39,7 +39,7 @@ export default function Health() {
 
   async function logHealthMetric(type: string, value: number) {
     await supabase.from('health_logs').insert({ user_id: user?.id, date: today, type, value })
-    addXP(3, `health_${type}`)
+    await addXP(3, `health_${type}`)
     await refresh()
   }
 

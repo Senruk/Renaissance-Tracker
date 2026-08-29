@@ -41,7 +41,7 @@ export default function Dashboard() {
       await supabase.from('mood_logs').update({ mood_score: value, note }).eq('id', todayMood.id)
     } else {
       await supabase.from('mood_logs').insert({ user_id: user?.id, date: today, mood_score: value, note })
-      addXP(XP.MOOD_LOG, 'mood_log')
+      await addXP(XP.MOOD_LOG, 'mood_log')
     }
     await refresh()
   }
@@ -49,7 +49,7 @@ export default function Dashboard() {
   async function handleWaterAdd(amount: number) {
     if (amount > 0) {
       await supabase.from('water_logs').insert({ user_id: user?.id, date: today, amount_ml: amount })
-      if (todayWater + amount >= 2000) addXP(XP.WATER_GOAL, 'water_goal')
+      if (todayWater + amount >= 2000) await addXP(XP.WATER_GOAL, 'water_goal')
     } else {
       const last = data.water_logs[data.water_logs.length - 1]
       if (last) await supabase.from('water_logs').delete().eq('id', last.id)
@@ -118,7 +118,7 @@ export default function Dashboard() {
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          onBlur={async () => { if (todayMood) await supabase.from('mood_logs').update({ note }).eq('id', todayMood.id) }}
+          onBlur={async () => { if (todayMood) { await supabase.from('mood_logs').update({ note }).eq('id', todayMood.id); await refresh() } }}
           placeholder="Add a note..."
           className="w-full mt-4 bg-bg-secondary/80 border border-white/10 rounded-lg px-4 py-2 text-text-primary/90 outline-none focus:border-white/20 focus:ring-2 focus:ring-accent-gold/20"
         />

@@ -126,6 +126,7 @@ export default function Leads() {
 
     // Update lead status
     await supabase.from('leads').update({ status: callOutcome, updated_at: now }).eq('id', callingLead.id)
+    await fetchAll()
 
     // Update local state
     const newLog: CallLog = {

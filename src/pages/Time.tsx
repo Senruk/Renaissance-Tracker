@@ -33,7 +33,7 @@ export default function TimePage() {
         domain: selectedDomain,
         minutes: elapsed,
       })
-      addXP(Math.floor(elapsed / 10) * 5, 'time_tracking')
+      await addXP(Math.floor(elapsed / 10) * 5, 'time_tracking')
       await refresh()
     }
     setTracking(null)

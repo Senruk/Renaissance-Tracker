@@ -17,14 +17,14 @@ export default function Habits() {
     if (!newHabit.trim()) return
     await supabase.from('habits').insert({ user_id: user?.id, name: newHabit, active: true })
     setNewHabit('')
-    addXP(5, 'create_habit')
+    await addXP(5, 'create_habit')
     await refresh()
   }
 
   async function toggleHabit(id: string, completed: boolean) {
     if (!completed) {
       await supabase.from('habit_logs').insert({ user_id: user?.id, habit_id: id, date: today })
-      addXP(XP.HABIT_COMPLETE, 'habit_complete')
+      await addXP(XP.HABIT_COMPLETE, 'habit_complete')
     } else {
       await supabase.from('habit_logs').delete().eq('habit_id', id).eq('date', today)
     }
@@ -45,7 +45,7 @@ export default function Habits() {
 
   async function toggleTask(id: string, completed: boolean) {
     await supabase.from('tasks').update({ completed: !completed }).eq('id', id)
-    if (!completed) addXP(XP.TASK_COMPLETE, 'task_complete')
+    if (!completed) await addXP(XP.TASK_COMPLETE, 'task_complete')
     await refresh()
   }
 

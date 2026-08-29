@@ -250,24 +250,51 @@ export class EnhancedSupabaseClient implements SupabaseClient {
     _cols?: string[],
     _data?: any
   ): SupabaseQueryBuilder {
+    // Track filters so offline queue can preserve them
+    const capturedFilters: any[] = []
+    const capturedOrder: any = undefined
+    const capturedLimit: number | undefined = undefined
+    const capturedSingle: boolean | undefined = undefined
+
+    const self = this
     return {
-      select: (...cols: string[]) => this.wrapBuilderMethods(builder.select(...cols), table, 'SELECT', cols, _data),
-      insert: (rows: any | any[]) => this.wrapBuilderMethods(builder.insert(rows), table, 'INSERT', _cols, rows),
-      update: (obj: any) => this.wrapBuilderMethods(builder.update(obj), table, 'UPDATE', _cols, obj),
-      delete: () => this.wrapBuilderMethods(builder.delete(), table, 'DELETE', _cols, _data),
-      eq: (col: string, value: any) => this.wrapBuilderMethods(builder.eq(col, value), table, op, _cols, _data),
-      neq: (col: string, value: any) => this.wrapBuilderMethods(builder.neq(col, value), table, op, _cols, _data),
-      in: (col: string, values: any[]) => this.wrapBuilderMethods(builder.in(col, values), table, op, _cols, _data),
-      gt: (col: string, value: any) => this.wrapBuilderMethods(builder.gt(col, value), table, op, _cols, _data),
-      gte: (col: string, value: any) => this.wrapBuilderMethods(builder.gte(col, value), table, op, _cols, _data),
-      lt: (col: string, value: any) => this.wrapBuilderMethods(builder.lt(col, value), table, op, _cols, _data),
-      lte: (col: string, value: any) => this.wrapBuilderMethods(builder.lte(col, value), table, op, _cols, _data),
-      order: (col: string, opts?: { ascending?: boolean }) => this.wrapBuilderMethods(builder.order(col, opts), table, op, _cols, _data),
-      limit: (n: number) => this.wrapBuilderMethods(builder.limit(n), table, op, _cols, _data),
-      single: () => this.wrapBuilderMethods(builder.single(), table, op, _cols, _data),
+      select: (...cols: string[]) => self.wrapBuilderMethods(builder.select(...cols), table, 'SELECT', cols, _data),
+      insert: (rows: any | any[]) => self.wrapBuilderMethods(builder.insert(rows), table, 'INSERT', _cols, rows),
+      update: (obj: any) => self.wrapBuilderMethods(builder.update(obj), table, 'UPDATE', _cols, obj),
+      delete: () => self.wrapBuilderMethods(builder.delete(), table, 'DELETE', _cols, _data),
+      eq: (col: string, value: any) => {
+        capturedFilters.push(['eq', col, value])
+        return self.wrapBuilderMethods(builder.eq(col, value), table, op, _cols, _data)
+      },
+      neq: (col: string, value: any) => {
+        capturedFilters.push(['neq', col, value])
+        return self.wrapBuilderMethods(builder.neq(col, value), table, op, _cols, _data)
+      },
+      in: (col: string, values: any[]) => {
+        capturedFilters.push(['in', col, values])
+        return self.wrapBuilderMethods(builder.in(col, values), table, op, _cols, _data)
+      },
+      gt: (col: string, value: any) => {
+        capturedFilters.push(['gt', col, value])
+        return self.wrapBuilderMethods(builder.gt(col, value), table, op, _cols, _data)
+      },
+      gte: (col: string, value: any) => {
+        capturedFilters.push(['gte', col, value])
+        return self.wrapBuilderMethods(builder.gte(col, value), table, op, _cols, _data)
+      },
+      lt: (col: string, value: any) => {
+        capturedFilters.push(['lt', col, value])
+        return self.wrapBuilderMethods(builder.lt(col, value), table, op, _cols, _data)
+      },
+      lte: (col: string, value: any) => {
+        capturedFilters.push(['lte', col, value])
+        return self.wrapBuilderMethods(builder.lte(col, value), table, op, _cols, _data)
+      },
+      order: (col: string, opts?: { ascending?: boolean }) => self.wrapBuilderMethods(builder.order(col, opts), table, op, _cols, _data),
+      limit: (n: number) => self.wrapBuilderMethods(builder.limit(n), table, op, _cols, _data),
+      single: () => self.wrapBuilderMethods(builder.single(), table, op, _cols, _data),
       then: (onfulfilled?: any, onrejected?: any) => {
-        // When .then() is called, execute the query with offline support
-        return this.executeWithQueue(table, op, builder, _cols, _data).then(onfulfilled, onrejected)
+        return self.executeWithQueue(table, op, builder, _cols, _data, capturedFilters, capturedOrder, capturedLimit, capturedSingle).then(onfulfilled, onrejected)
       }
     }
   }
@@ -277,7 +304,11 @@ export class EnhancedSupabaseClient implements SupabaseClient {
     op: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE',
     builder: SupabaseQueryBuilder,
     _cols: string[] | undefined,
-    data: any
+    data: any,
+    filters: any[] = [],
+    order?: any,
+    limit?: number,
+    single?: boolean
   ): Promise<SupabaseResult> {
     // For SELECT operations, just execute immediately
     if (op === 'SELECT') {
@@ -290,11 +321,11 @@ export class EnhancedSupabaseClient implements SupabaseClient {
         this.operationQueue.push({
           table,
           op,
-          filters: [], // Filters would need to be extracted from builder in real impl
+          filters,
           data,
-          order: undefined,
-          limit: undefined,
-          single: undefined,
+          order,
+          limit,
+          single,
           timestamp: Date.now(),
           resolve,
           reject

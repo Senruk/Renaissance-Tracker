@@ -32,7 +32,7 @@ export default function Gym() {
       duration: parseInt(duration) || null,
       notes,
     })
-    addXP(XP.WORKOUT_LOG + selectedMuscles.length * 5, 'workout')
+    await addXP(XP.WORKOUT_LOG + selectedMuscles.length * 5, 'workout')
     setSelectedMuscles([])
     setDuration('')
     setNotes('')

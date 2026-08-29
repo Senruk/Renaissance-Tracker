@@ -90,6 +90,22 @@ export default function Career() {
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Restore a persisted timer session from before a navigation
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('ren:career-timer')
+      if (raw) {
+        const saved = JSON.parse(raw)
+        if (saved.label && saved.ts && Date.now() - saved.ts < 24 * 60 * 60 * 1000) {
+          setTimerLabel(saved.label)
+          setTimerSeconds(saved.seconds)
+          setTimerActive(saved.active)
+          localStorage.removeItem('ren:career-timer')
+        }
+      }
+    } catch { /* ignore */ }
+  }, [])
+
   // Merge skills with progress data
   const skillsWithProgress = SKILLS.map(skill => {
     const prog = data.skill_progress.find((p: any) => p.skill_id === skill.id)
@@ -122,6 +138,22 @@ export default function Career() {
     }
   }, [timerActive, timerSeconds])
 
+  // Persist timer session state on unmount so nothing is lost on navigation
+  useEffect(() => {
+    return () => {
+      if (timerLabel.trim()) {
+        try {
+          localStorage.setItem('ren:career-timer', JSON.stringify({
+            label: timerLabel,
+            seconds: timerSeconds,
+            active: timerActive,
+            ts: Date.now(),
+          }))
+        } catch { /* ignore */ }
+      }
+    }
+  }, [timerLabel, timerSeconds, timerActive])
+
   function startTimer() {
     if (!timerLabel.trim()) return
     setTimerActive(true)
@@ -149,7 +181,7 @@ export default function Career() {
       skill_name: timerLabel,
       duration_min: minutes,
     })
-    addXP(20 + minutes, 'skill_session')
+    await addXP(20 + minutes, 'skill_session')
     resetTimer()
     await refresh()
   }

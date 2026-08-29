@@ -46,40 +46,53 @@ export function useData() {
     const todayStr = new Date().toISOString().split('T')[0]
     setToday(todayStr)
 
-    const [habits, habit_logs, water, mood, tasks, time, workouts, quests, focus, meals, work, breaks, skills, skillSessions, income] = await Promise.all([
-      supabase.from('habits').select('*').eq('user_id', user.id).order('created_at'),
-      supabase.from('habit_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('water_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('mood_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('tasks').select('*').eq('user_id', user.id).order('created_at'),
-      supabase.from('time_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('workout_logs').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(30),
-      supabase.from('quest_progress').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('focus_sessions').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('meal_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('work_sessions').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('break_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('skill_progress').select('*').eq('user_id', user.id),
-      supabase.from('skill_sessions').select('*').eq('user_id', user.id).eq('date', todayStr),
-      supabase.from('income_logs').select('*').eq('user_id', user.id).eq('date', todayStr),
-    ])
+    const queries = {
+      habits: supabase.from('habits').select('*').eq('user_id', user.id).order('created_at'),
+      habit_logs: supabase.from('habit_logs').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+      water: supabase.from('water_logs').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+      mood: supabase.from('mood_logs').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+      tasks: supabase.from('tasks').select('*').eq('user_id', user.id).order('created_at'),
+      time: supabase.from('time_logs').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+      workouts: supabase.from('workout_logs').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(30),
+      quests: supabase.from('quest_progress').select('*').eq('user_id', user.id).eq('date', todayStr),
+      focus: supabase.from('focus_sessions').select('*').eq('user_id', user.id).eq('date', todayStr),
+      meals: supabase.from('meal_logs').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+      work: supabase.from('work_sessions').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+      breaks: supabase.from('break_logs').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+      skills: supabase.from('skill_progress').select('*').eq('user_id', user.id),
+      skillSessions: supabase.from('skill_sessions').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+      income: supabase.from('income_logs').select('*').eq('user_id', user.id).eq('date', todayStr).order('created_at', { ascending: false }),
+    }
+
+    const settled = await Promise.allSettled(Object.values(queries))
+    const get = (_key: string, settledIdx: number): any[] => {
+      const r = settled[settledIdx]
+      return r.status === 'fulfilled' ? (r.value?.data || []) : []
+    }
+    const failed = settled.filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+    if (failed.length > 0) {
+      console.warn(`[useData] ${failed.length} of ${Object.keys(queries).length} table queries failed — using partial data`)
+    }
+
+    const idx: Record<string, number> = {}
+    Object.keys(queries).forEach((k, i) => { idx[k] = i })
 
     setData({
-      habits: habits.data || [],
-      habit_logs: habit_logs.data || [],
-      water_logs: water.data || [],
-      mood_logs: mood.data || [],
-      tasks: tasks.data || [],
-      time_logs: time.data || [],
-      workout_logs: workouts.data || [],
-      quest_progress: quests.data || [],
-      focus_sessions: focus.data || [],
-      meal_logs: meals.data || [],
-      work_sessions: work.data || [],
-      break_logs: breaks.data || [],
-      skill_progress: skills.data || [],
-      skill_sessions: skillSessions.data || [],
-      income_logs: income.data || [],
+      habits: get('habits', idx.habits),
+      habit_logs: get('habit_logs', idx.habit_logs),
+      water_logs: get('water', idx.water),
+      mood_logs: get('mood', idx.mood),
+      tasks: get('tasks', idx.tasks),
+      time_logs: get('time', idx.time),
+      workout_logs: get('workouts', idx.workouts),
+      quest_progress: get('quests', idx.quests),
+      focus_sessions: get('focus', idx.focus),
+      meal_logs: get('meals', idx.meals),
+      work_sessions: get('work', idx.work),
+      break_logs: get('breaks', idx.breaks),
+      skill_progress: get('skills', idx.skills),
+      skill_sessions: get('skillSessions', idx.skillSessions),
+      income_logs: get('income', idx.income),
     })
   }, [user])
 

@@ -75,7 +75,7 @@ export default function Body() {
       duration: parseInt(workoutDuration) || null,
       notes: workoutNotes,
     })
-    addXP(XP.WORKOUT_LOG + selectedMuscles.length * 5, 'workout')
+    await addXP(XP.WORKOUT_LOG + selectedMuscles.length * 5, 'workout')
     setSelectedMuscles([])
     setWorkoutDuration('')
     setWorkoutNotes('')
@@ -87,7 +87,7 @@ export default function Body() {
       await supabase.from('mood_logs').update({ mood_score: value }).eq('id', todayMood.id)
     } else {
       await supabase.from('mood_logs').insert({ user_id: user?.id, date: today, mood_score: value })
-      addXP(XP.MOOD_LOG, 'mood_log')
+      await addXP(XP.MOOD_LOG, 'mood_log')
     }
     await refresh()
   }
@@ -95,7 +95,7 @@ export default function Body() {
   async function handleWaterAdd(amount: number) {
     if (amount > 0) {
       await supabase.from('water_logs').insert({ user_id: user?.id, date: today, amount_ml: amount })
-      if (todayWater + amount >= 2000) addXP(XP.WATER_GOAL, 'water_goal')
+      if (todayWater + amount >= 2000) await addXP(XP.WATER_GOAL, 'water_goal')
     } else {
       const last = data.water_logs[data.water_logs.length - 1]
       if (last) await supabase.from('water_logs').delete().eq('id', last.id)
@@ -105,7 +105,7 @@ export default function Body() {
 
   async function logHealthMetric(type: string, value: number) {
     await supabase.from('health_logs').insert({ user_id: user?.id, date: today, type, value })
-    addXP(3, `health_${type}`)
+    await addXP(3, `health_${type}`)
     await refresh()
   }
 
@@ -120,7 +120,7 @@ export default function Body() {
       carbs_g: parseInt(carbs) || 0,
       fat_g: parseInt(fat) || 0,
     })
-    addXP(10, 'meal_log')
+    await addXP(10, 'meal_log')
     setMealName('')
     setCalories('')
     setProtein('')
@@ -138,7 +138,7 @@ export default function Body() {
       total_minutes: parseInt(workMinutes),
       category: workCategory,
     })
-    addXP(20, 'work_session')
+    await addXP(20, 'work_session')
     setWorkTask('')
     setWorkMinutes('')
     await refresh()
@@ -331,7 +331,7 @@ export default function Body() {
                           </div>
                         </div>
                         <button
-                          onClick={async () => { await supabase.from('meal_logs').delete().eq('id', m.id); await refresh() }}
+                          onClick={async () => { try { await supabase.from('meal_logs').delete().eq('id', m.id); await refresh() } catch (err) { console.error('[Body] delete meal failed:', err) } }}
                           className="p-1 hover:bg-bg-secondary/60 rounded transition-colors"
                         >
                           <Trash2 size={12} className="text-text-tertiary" />

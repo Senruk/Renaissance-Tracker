@@ -80,6 +80,13 @@ function matches(row: any, filters: Filter[]): boolean {
   })
 }
 
+function projectColumns(row: any, cols?: string[]): any {
+  if (!cols || cols.length === 0 || cols.includes('*')) return row
+  const out: any = {}
+  for (const col of cols) { if (col in row) out[col] = row[col] }
+  return out
+}
+
 async function execLocal(
   table: string,
   op: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE',
@@ -88,11 +95,25 @@ async function execLocal(
   order?: Order,
   limit?: number,
   single?: boolean,
+  cols?: string[],
+  insertReturn?: any,
 ): Promise<SupabaseResult> {
   const rows = lsRead(table)
+  if (op === 'INSERT' && insertReturn) {
+    // Chained .insert().select() — return the just-inserted rows
+    const projectRow = (row: any) => {
+      if (!cols || cols.length === 0 || cols.includes('*')) return row
+      const out: any = {}
+      for (const col of cols) { if (col in row) out[col] = row[col] }
+      return out
+    }
+    if (single) return { data: projectRow((insertReturn as any[])[0]) ?? null, error: null }
+    const result = Array.isArray(insertReturn) ? insertReturn.map(projectRow) : [projectRow(insertReturn)]
+    return { data: result, error: null }
+  }
   if (op === 'INSERT') {
     const entries = Array.isArray(data) ? data : [data]
-    const nextId = rows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1
+    let nextId = rows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1
     const inserted: any[] = []
     for (const entry of entries) {
       const row = { ...stamp(entry, table), user_id: entry.user_id ?? 'local' }
@@ -100,16 +121,29 @@ async function execLocal(
       if (row.created_at === undefined) row.created_at = nowIso()
       rows.push(row)
       inserted.push(row)
-      nextId + 1
+      nextId++
     }
     lsWrite(table, rows)
     return { data: single ? inserted[0] ?? null : inserted, error: null }
   }
   if (op === 'SELECT') {
     let out = rows.filter((r) => matches(r, filters)).map((r) => pipe(r, table))
+    // Column projection
+    if (cols && cols.length && !cols.includes('*')) {
+      out = out.map((r) => projectColumns(r, cols))
+    }
     if (order) {
       const dir = order.direction === 'desc' ? -1 : 1
       out = out.sort((a, b) => (a[order.col] > b[order.col] ? dir : a[order.col] < b[order.col] ? -dir : 0))
+    }
+    // Column projection
+    if (cols && cols.length && !cols.includes('*')) {
+      out = out.map((r) => {
+        if (!cols || cols.length === 0 || cols.includes('*')) return r
+        const out: any = {}
+        for (const col of cols) { if (col in r) out[col] = r[col] }
+        return out
+      })
     }
     if (limit && limit > 0) out = out.slice(0, limit)
     if (single) return { data: out[0] ?? null, error: null }
@@ -181,6 +215,8 @@ class Builder {
   private limitNb?: number
   private singleFlag = false
   private data: any = null
+  private cols: string[] = []
+  private insertReturn: any = null // captures INSERT result for chained .select()
 
   constructor(table: string, op: OpKind = 'SELECT') {
     this.table = table
@@ -201,7 +237,7 @@ class Builder {
       } catch (err: any) {
         console.error(`[DB] ${this.table}.${this.op} failed → local fallback:`, err)
         engine = 'local'
-        return execLocal(this.table, this.op, this.filters, this.data, this.order, this.limitNb, this.singleFlag)
+        return execLocal(this.table, this.op, this.filters, this.data, this.order, this.limitNb, this.singleFlag, this.cols, this.insertReturn)
       }
     })()
   }
@@ -214,14 +250,56 @@ class Builder {
   }
 
   select(...cols: string[]) {
-    void cols  // cols accepted for Supabase API parity; not used in local engine
+    // Support post-insert select: .insert().select().single()
+    if (this.op === 'INSERT' && this.insertReturn) {
+      const inserted = Array.isArray(this.insertReturn) ? this.insertReturn : [this.insertReturn]
+      if (this.singleFlag) return this.resolveSingle(this.project(inserted[0]))
+      return this.resolveList(this.project(inserted))
+    }
+    this.cols = cols.length ? cols : ['*']
     this.op = 'SELECT'
     return this
   }
+
   insert(rows: any | any[]) {
     this.op = 'INSERT'
     this.data = rows
+    // Capture the result so chained .select() can return it
+    const entries = Array.isArray(rows) ? rows : [rows]
+    this.insertReturn = entries
     return this
+  }
+
+  private project(row: any): any {
+    if (this.cols.length === 0 || this.cols.includes('*')) return row
+    const out: any = {}
+    for (const col of this.cols) { if (col in row) out[col] = row[col] }
+    return out
+  }
+
+  private resolveSingle(row: any): any {
+    // Return a thenable that resolves with { data, error }
+    const self = this
+    return {
+      then(onfulfilled?: any, onrejected?: any) {
+        return Promise.resolve({ data: row, error: null }).then(onfulfilled, onrejected)
+      },
+      // Allow further chaining (e.g., .single()) — no-op since already single
+      eq() { return self.resolveSingle(row) },
+      select() { return self.resolveSingle(row) },
+    } as any
+  }
+
+  private resolveList(rows: any[]): any {
+    const self = this
+    return {
+      then(onfulfilled?: any, onrejected?: any) {
+        return Promise.resolve({ data: rows, error: null }).then(onfulfilled, onrejected)
+      },
+      order() { return self.resolveList(rows) },
+      limit() { return self.resolveList(rows) },
+      single() { return self.resolveSingle(rows[0] ?? null) },
+    } as any
   }
   update(obj: any) {
     this.op = 'UPDATE'
