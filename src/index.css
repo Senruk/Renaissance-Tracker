@@ -79,6 +79,88 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* ===== Mobile hardening ===== */
+
+/* iOS/Android: stop the page from zooming on input focus (font-size < 16px triggers it) */
+@supports (-webkit-touch-callout: none) {
+  input, select, textarea {
+    font-size: max(16px, 1em) !important;
+  }
+}
+
+/* 44px minimum touch target — Apple HIG / WCAG 2.5.5 */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Buttons get a 44px min-height by default — fixes small icon-only buttons on mobile */
+button {
+  min-height: 36px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media (pointer: coarse) {
+  button {
+    min-height: 44px;
+  }
+}
+
+/* Prevent pull-to-refresh jank on Chrome Android + iOS overscroll on inner scrollable areas */
+html, body {
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* iPhone safe-area padding for fixed bottom nav */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Sticky elements behind the safe area use a tinted mask so the bar reads as a single piece */
+.safe-area-bottom::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -100% 0;
+  height: 100%;
+  background: inherit;
+  pointer-events: none;
+}
+
+/* Glass card children should not overflow on narrow screens */
+.glass, .glass-luxury, .glass-luxury-strong, .card-luxury, .card-purple, .card-gold {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  min-width: 0;
+}
+
+/* Reduce motion: kill all the framer-motion transitions */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Small screens: tighter padding, smaller hero text */
+@media (max-width: 480px) {
+  .text-2xl { font-size: 1.4rem; line-height: 1.3; }
+  .text-3xl { font-size: 1.7rem; line-height: 1.2; }
+  .text-4xl { font-size: 2rem; line-height: 1.15; }
+}
+
 /* Utility classes - kept for backward compatibility during transition */
 /* Note: Tailwind v4 doesn't support @apply for custom classes */
 /* Use the actual classes (glass-luxury, glass-luxury-strong) directly in components */

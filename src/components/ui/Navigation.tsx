@@ -15,7 +15,7 @@ export default function Navigation() {
   const location = useLocation()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-luxury-strong border-t border-white/10 safe-area-bottom backdrop-blur-sm">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-luxury-strong border-t border-white/10 safe-area-bottom backdrop-blur-md" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0)' }}>
       <div className="max-w-lg mx-auto flex justify-around items-center py-3 px-2">
         {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
           const active = location.pathname === path
