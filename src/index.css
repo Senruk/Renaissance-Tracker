@@ -14,24 +14,69 @@ html, body, #root {
 
 body {
   font-family: var(--font-sans);
-  background: var(--color-bg-primary);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(155, 114, 245, 0.18), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(240, 180, 41, 0.08), transparent 60%),
+    var(--color-bg-primary);
+  background-attachment: fixed;
   color: var(--color-text-primary);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: var(--color-bg-secondary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-accent-gold);
+  background: linear-gradient(180deg, var(--color-accent-gold), var(--color-accent-purple));
   border-radius: var(--radius-md);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-amber);
+  background: linear-gradient(180deg, var(--color-accent-gold2), var(--color-accent-purple2));
+}
+
+::selection {
+  background: rgba(240, 180, 41, 0.25);
+  color: var(--color-text-primary);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+}
+
+input, button, textarea, select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 2px;
 }
 
 /* Utility classes - kept for backward compatibility during transition */
