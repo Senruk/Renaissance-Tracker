@@ -7,7 +7,6 @@ import Dashboard from './pages/Dashboard'
 import Habits from './pages/Habits'
 import Body from './pages/Body'
 import Coach from './pages/Coach'
-import Leads from './pages/Leads'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
 
@@ -35,7 +34,6 @@ function AppRoutes() {
           <Route path="/habits" element={<ProtectedRoute><Habits /></ProtectedRoute>} />
           <Route path="/body" element={<ProtectedRoute><Body /></ProtectedRoute>} />
           <Route path="/coach" element={<ProtectedRoute><Coach /></ProtectedRoute>} />
-          <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

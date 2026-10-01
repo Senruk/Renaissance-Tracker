@@ -18,8 +18,6 @@ const TABLES: Record<string, string[]> = {
   health_logs: ['id', 'user_id', 'date', 'type', 'value', 'created_at'],
   quest_progress: ['id', 'user_id', 'date', 'quest_id', 'progress', 'target', 'completed', 'created_at'],
   focus_sessions: ['id', 'user_id', 'date', 'minutes', 'created_at'],
-  leads: ['id', 'user_id', 'business_name', 'contact_name', 'phone', 'email', 'notes', 'status', 'source', 'created_at', 'updated_at'],
-  call_logs: ['id', 'user_id', 'lead_id', 'outcome', 'notes', 'created_at'],
   xp_logs: ['id', 'user_id', 'amount', 'source', 'created_at'],
   meal_logs: ['id', 'user_id', 'date', 'name', 'calories', 'protein_g', 'carbs_g', 'fat_g', 'created_at'],
   work_sessions: ['id', 'user_id', 'date', 'task_name', 'total_minutes', 'category', 'created_at'],

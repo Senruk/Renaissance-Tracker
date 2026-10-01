@@ -1,12 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CheckSquare2, User, Brain, Users, BarChart3 } from 'lucide-react'
+import { LayoutDashboard, CheckSquare2, User, Brain, BarChart3 } from 'lucide-react'
 
 const NAV_ITEMS = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Today' },
   { path: '/habits', icon: CheckSquare2, label: 'Habits' },
   { path: '/body', icon: User, label: 'Body' },
   { path: '/coach', icon: Brain, label: 'Coach' },
-  { path: '/leads', icon: Users, label: 'Leads' },
   { path: '/analytics', icon: BarChart3, label: 'Stats' },
 ]
 

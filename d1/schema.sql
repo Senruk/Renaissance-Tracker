@@ -125,32 +125,7 @@ create table if not exists focus_sessions (
   created_at text default (datetime('now'))
 );
 
--- 12. LEADS (SMMA lead tracking)
-create table if not exists leads (
-  id integer primary key autoincrement,
-  user_id text default 'local',
-  business_name text not null,
-  contact_name text default '',
-  phone text default '',
-  email text default '',
-  notes text default '',
-  status text not null default 'pending' check (status in ('pending', 'yes', 'no', 'maybe')),
-  source text default '',
-  created_at text default (datetime('now')),
-  updated_at text default (datetime('now'))
-);
-
--- 13. CALL LOGS (track daily call attempts)
-create table if not exists call_logs (
-  id integer primary key autoincrement,
-  user_id text default 'local',
-  lead_id integer not null,
-  outcome text not null check (outcome in ('yes', 'no', 'maybe', 'no_answer')),
-  notes text default '',
-  created_at text default (datetime('now'))
-);
-
--- 14. XP LOGS
+-- 12. XP LOGS
 create table if not exists xp_logs (
   id integer primary key autoincrement,
   user_id text default 'local',

@@ -31,7 +31,7 @@ export default function Settings() {
     // Clear all local data for the user
     const tables = ['profiles', 'habits', 'habit_logs', 'water_logs', 'mood_logs',
       'tasks', 'time_logs', 'workout_logs', 'health_logs', 'quest_progress',
-      'focus_sessions', 'leads', 'call_logs', 'xp_logs']
+      'focus_sessions', 'xp_logs']
     for (const t of tables) {
       await supabase.from(t).delete().eq('user_id', user?.id)
     }
