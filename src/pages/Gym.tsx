@@ -19,6 +19,7 @@ import {
   normaliseGroups,
   STATUS_META,
 } from '../lib/recovery'
+import { computeStats, longestGapDays } from '../lib/stats'
 import { useMuscleDetection, useCoachNarrative } from '../hooks/useMuscleDetection'
 import GlassCard from '../components/ui/GlassCard'
 import BodyDiagram from '../components/3d/BodyDiagram'
@@ -31,7 +32,7 @@ export default function Gym() {
   const { resolve, resolving } = useMuscleDetection()
   const { narrative, loading: narrativeLoading, generate: generateNarrative } = useCoachNarrative()
 
-  const [view, setView] = useState<'log' | 'recovery' | 'history'>('log')
+  const [view, setView] = useState<'log' | 'recovery' | 'stats' | 'history'>('log')
   const [draft, setDraft] = useState('')
   const [exercises, setExercises] = useState<ParsedExercise[]>([])
   // name -> muscles. Filled from the local map the moment an exercise is added
@@ -63,6 +64,11 @@ export default function Gym() {
   const board = useMemo(() => computeRecovery(data.workout_logs), [data.workout_logs])
   const readyNow = useMemo(() => board.filter((b) => b.status === 'ready'), [board])
   const sortedBoard = useMemo(() => sortByReadiness(board), [board])
+  const stats = useMemo(() => computeStats(data.workout_logs), [data.workout_logs])
+  const maxMuscleVolume = useMemo(
+    () => Math.max(1, ...stats.perMuscle.map((m) => m.volume)),
+    [stats.perMuscle],
+  )
 
   useEffect(() => {
     if (view === 'recovery' && board.length > 0) generateNarrative(board)
@@ -146,7 +152,7 @@ export default function Gym() {
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold text-white">Gym</h1>
         <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
-          {(['log', 'recovery', 'history'] as const).map((v) => (
+          {(['log', 'recovery', 'stats', 'history'] as const).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -364,6 +370,146 @@ export default function Gym() {
             </div>
           </GlassCard>
         </>
+      ) : view === 'stats' ? (
+        /* Stats */
+        <div className="space-y-3">
+          {stats.sessions === 0 ? (
+            <GlassCard>
+              <p className="text-white/40 text-sm text-center py-4">
+                No workouts logged yet. Stats appear once you log a session.
+              </p>
+            </GlassCard>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <GlassCard className="text-center py-3">
+                  <div className="text-2xl font-bold text-neon-cyan">{stats.sessions}</div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-wider">Sessions</div>
+                </GlassCard>
+                <GlassCard className="text-center py-3">
+                  <div className="text-2xl font-bold text-neon-pink">
+                    {stats.currentStreak}
+                  </div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-wider">
+                    Day streak
+                  </div>
+                </GlassCard>
+                <GlassCard className="text-center py-3">
+                  <div className="text-2xl font-bold text-white">
+                    {stats.totalVolume.toLocaleString('en-GB')}
+                  </div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-wider">
+                    Volume (kg)
+                  </div>
+                </GlassCard>
+                <GlassCard className="text-center py-3">
+                  <div className="text-2xl font-bold text-white">
+                    {stats.thisWeekSessions}
+                  </div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-wider">
+                    This week
+                  </div>
+                </GlassCard>
+              </div>
+              <GlassCard>
+                <div className="text-xs font-semibold text-white mb-3">Totals</div>
+                <div className="grid grid-cols-2 gap-y-3 text-sm">
+                  <div>
+                    <div className="text-white/40 text-xs">Week volume</div>
+                    <div className="text-white font-medium">
+                      {stats.thisWeekVolume.toLocaleString('en-GB')} kg
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-white/40 text-xs">Total sets</div>
+                    <div className="text-white font-medium">{stats.totalSets}</div>
+                  </div>
+                  <div>
+                    <div className="text-white/40 text-xs">Total reps</div>
+                    <div className="text-white font-medium">
+                      {stats.totalReps.toLocaleString('en-GB')}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-white/40 text-xs">Avg session</div>
+                    <div className="text-white font-medium">
+                      {stats.avgDuration > 0 ? `${stats.avgDuration} min` : '—'}
+                    </div>
+                  </div>
+                </div>
+                {stats.lastSession && (
+                  <p className="text-[11px] text-white/30 mt-3 pt-3 border-t border-white/5">
+                    Last trained{' '}
+                    {new Date(stats.lastSession).toLocaleDateString('en-GB', {
+                      day: 'numeric', month: 'short',
+                    })}
+                    {longestGapDays(data.workout_logs) > 7 && (
+                      <>
+                        {' · longest gap '}
+                        {longestGapDays(data.workout_logs)}d
+                      </>
+                    )}
+                  </p>
+                )}
+              </GlassCard>
+              <GlassCard>
+                <div className="text-xs font-semibold text-white mb-3">Volume by muscle</div>
+                <div className="space-y-2">
+                  {stats.perMuscle.map((m) => (
+                    <div key={m.muscle}>
+                      <div className="flex justify-between text-[11px] mb-0.5">
+                        <span className="text-white/60">{m.label}</span>
+                        <span className="text-white/30">
+                          {m.sessions > 0
+                            ? `${m.volume.toLocaleString('en-GB')}kg · ${m.sets} sets`
+                            : 'not trained'}
+                        </span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-neon-cyan to-neon-purple transition-all duration-500"
+                          style={{ width: `${Math.round((m.volume / maxMuscleVolume) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+              {stats.personalRecords.length > 0 && (
+                <GlassCard>
+                  <div className="text-xs font-semibold text-white mb-2">Personal records</div>
+                  <div className="space-y-1.5">
+                    {stats.personalRecords.map((e) => (
+                      <div key={e.name} className="flex justify-between text-sm">
+                        <span className="text-white/60 capitalize truncate">{e.name}</span>
+                        <span className="text-neon-yellow font-medium shrink-0 ml-2">
+                          {e.bestSet}kg
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </GlassCard>
+              )}
+              {stats.topExercises.length > 0 && (
+                <GlassCard>
+                  <div className="text-xs font-semibold text-white mb-2">
+                    Top exercises by volume
+                  </div>
+                  <div className="space-y-1.5">
+                    {stats.topExercises.map((e) => (
+                      <div key={e.name} className="flex justify-between text-sm">
+                        <span className="text-white/60 capitalize truncate">{e.name}</span>
+                        <span className="text-white/30 shrink-0 ml-2">
+                          {e.sessions}× · {e.volume.toLocaleString('en-GB')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </GlassCard>
+              )}
+            </>
+          )}
+        </div>
       ) : (
         /* History */
         <div className="space-y-2">

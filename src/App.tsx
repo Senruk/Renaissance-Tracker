@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Habits from './pages/Habits'
 import Body from './pages/Body'
+import Gym from './pages/Gym'
 import Coach from './pages/Coach'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
@@ -33,6 +34,7 @@ function AppRoutes() {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/habits" element={<ProtectedRoute><Habits /></ProtectedRoute>} />
           <Route path="/body" element={<ProtectedRoute><Body /></ProtectedRoute>} />
+          <Route path="/gym" element={<ProtectedRoute><Gym /></ProtectedRoute>} />
           <Route path="/coach" element={<ProtectedRoute><Coach /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
