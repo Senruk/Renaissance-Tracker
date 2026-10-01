@@ -88,6 +88,7 @@ create table if not exists workout_logs (
   type text default 'GYM',            -- GYM | BADMINTON | REST
   activity text,                      -- e.g. "Push day, bench 60x5x5"
   muscle_groups text default '[]',    -- JSON array string
+  exercises text default '[]',       -- JSON array: [{name,sets,reps,weight}]
   duration integer,                   -- minutes
   notes text,
   created_at text default (datetime('now'))

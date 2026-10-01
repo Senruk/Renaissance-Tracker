@@ -125,6 +125,30 @@
   --color-text-tertiary: #77718a;
 }
 
+/* ---------------------------------------------------------------------------
+   Tailwind v4 colour theme.
+
+   The components were written against neon utility classes (text-neon-cyan,
+   bg-neon-pink/20, …) but the palette was later ported to CSS custom
+   properties only — no @theme block existed, so Tailwind never generated
+   those utilities and every one of them rendered unstyled. Declaring them
+   here makes the existing class names resolve again, with working /opacity
+   modifiers, and gives new components real tokens to use.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-neon-cyan: #00f0ff;
+  --color-neon-pink: #ff2d95;
+  --color-neon-yellow: #ffd166;
+  --color-neon-purple: #9b72f5;
+  --color-neon-green: #4ade80;
+  --color-neon-red: #f87171;
+
+  --color-gold: #f0b429;
+  --color-gold2: #ffd166;
+  --color-purple: #9b72f5;
+  --color-purple2: #b999ff;
+}
+
 /* Utility Classes — daily-life design (gold + purple on cool dark) */
 .glass,
 .glass-luxury {

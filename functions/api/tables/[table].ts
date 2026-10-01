@@ -14,7 +14,7 @@ const TABLES: Record<string, string[]> = {
   mood_logs: ['id', 'user_id', 'date', 'mood_score', 'note', 'created_at'],
   tasks: ['id', 'user_id', 'title', 'completed', 'priority', 'due_date', 'created_at'],
   time_logs: ['id', 'user_id', 'date', 'category', 'domain', 'minutes', 'created_at'],
-  workout_logs: ['id', 'user_id', 'date', 'type', 'activity', 'muscle_groups', 'duration', 'notes', 'created_at'],
+  workout_logs: ['id', 'user_id', 'date', 'type', 'activity', 'muscle_groups', 'exercises', 'duration', 'notes', 'created_at'],
   health_logs: ['id', 'user_id', 'date', 'type', 'value', 'created_at'],
   quest_progress: ['id', 'user_id', 'date', 'quest_id', 'progress', 'target', 'completed', 'created_at'],
   focus_sessions: ['id', 'user_id', 'date', 'minutes', 'created_at'],

@@ -116,6 +116,7 @@ create table if not exists workout_logs (
   user_id uuid references auth.users not null,
   date date not null default current_date,
   muscle_groups text[] not null default '{}',
+  exercises jsonb not null default '[]'::jsonb,
   duration integer,
   notes text,
   created_at timestamptz default now()
@@ -222,4 +223,7 @@ create index if not exists idx_mood_logs_user_date on mood_logs(user_id, date);
 create index if not exists idx_time_logs_user_date on time_logs(user_id, date);
 create index if not exists idx_workout_logs_user_date on workout_logs(user_id, date);
 create index if not exists idx_health_logs_user_date on health_logs(user_id, date);
+
+-- MIGRATION: structured exercise list for muscle recovery tracking
+alter table workout_logs add column if not exists exercises jsonb not null default '[]'::jsonb;
 create index if not exists idx_xp_logs_user on xp_logs(user_id);
