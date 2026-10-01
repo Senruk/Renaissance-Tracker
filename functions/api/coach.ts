@@ -8,7 +8,14 @@
 
 export const config = { runtime: 'edge_compatible' }
 
-const MODEL = 'llama-3.3-70b-versatile'
+// Groq retires models without warning — llama-3.3-70b-versatile is gone — so
+// fall back through the catalogue. Set GROQ_MODEL to pin one.
+const FALLBACK_MODELS = [
+  'openai/gpt-oss-120b',
+  'qwen/qwen3.8-27b',
+  'openai/gpt-oss-20b',
+]
+
 const ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
 
 const SYSTEM = `You are a concise strength coach. You are given a muscle recovery
@@ -41,39 +48,23 @@ export async function onRequest(context: any) {
     return json({ data: { headline: 'Nothing logged yet', body: 'Log a workout and this becomes useful.' }, configured: true })
   }
 
-  try {
-    const upstream = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.6,
-        max_tokens: 300,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: SYSTEM },
-          { role: 'user', content: JSON.stringify({ recoveryBoard: board }) },
-        ],
-      }),
-    })
+  const models = context?.env?.GROQ_MODEL
+    ? [context.env.GROQ_MODEL]
+    : FALLBACK_MODELS
 
-    if (!upstream.ok) return json({ data: null, configured: true })
-
-    const payload = await upstream.json()
-    const content = payload?.choices?.[0]?.message?.content ?? '{}'
-    const parsed = JSON.parse(content)
-
-    const headline = String(parsed?.headline ?? '').slice(0, 80)
-    const text = String(parsed?.body ?? '').slice(0, 400)
-    if (!headline || !text) return json({ data: null, configured: true })
-
-    return json({ data: { headline, body: text }, configured: true })
-  } catch {
-    return json({ data: null, configured: true })
+  for (const model of models) {
+    let note: any | null = null
+    try {
+      note = await ask(key, model, board)
+    } catch {
+      continue
+    }
+    if (!note) continue
+    return json({ data: { ...note, model }, configured: true })
   }
+
+  // No model answered — client keeps its deterministic narrative.
+  return json({ data: null, configured: true })
 }
 
 function json(obj: any, status = 200) {
@@ -81,4 +72,32 @@ function json(obj: any, status = 200) {
     status,
     headers: { 'content-type': 'application/json' },
   })
+}
+
+/** Ask one model; returns {headline, body} or null if it can't be used. */
+async function ask(key: string, model: string, board: unknown[]): Promise<any | null> {
+  const upstream = await fetch(ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.6,
+      max_tokens: 300,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: SYSTEM },
+        { role: 'user', content: JSON.stringify({ recoveryBoard: board }) },
+      ],
+    }),
+  })
+
+  if (!upstream.ok) return null
+  const payload = await upstream.json()
+  const parsed = JSON.parse(payload?.choices?.[0]?.message?.content ?? '{}')
+  const headline = String(parsed?.headline ?? '').slice(0, 80)
+  const body = String(parsed?.body ?? '').slice(0, 400)
+  return headline && body ? { headline, body } : null
 }

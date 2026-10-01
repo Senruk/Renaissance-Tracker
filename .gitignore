@@ -11,6 +11,10 @@ node_modules/
 .env.local
 .env.*.local
 
+# Cloudflare Pages local dev secrets (holds GROQ_API_KEY)
+.dev.vars
+.dev.vars.*
+
 # IDE
 .vscode/
 .idea/

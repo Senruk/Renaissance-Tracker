@@ -9,7 +9,17 @@
 
 export const config = { runtime: 'edge_compatible' }
 
-const MODEL = 'llama-3.3-70b-versatile'
+/**
+ * Models are tried in order until one answers. Groq retires models without
+ * much warning — llama-3.3-70b-versatile disappeared from the catalogue
+ * entirely — so a single hardcoded id is not safe. Set GROQ_MODEL to pin one.
+ */
+const FALLBACK_MODELS = [
+  'openai/gpt-oss-120b',
+  'qwen/qwen3.8-27b',
+  'openai/gpt-oss-20b',
+]
+
 const ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
 
 const VALID = [
@@ -52,38 +62,24 @@ export async function onRequest(context: any) {
     return json({ data: { results: [], configured: true }, error: null })
   }
 
-  try {
-    const upstream = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.1,
-        max_tokens: 800,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: SYSTEM },
-          { role: 'user', content: JSON.stringify({ exercises }) },
-        ],
-      }),
-    })
+  const models = context?.env?.GROQ_MODEL
+    ? [context.env.GROQ_MODEL]
+    : FALLBACK_MODELS
 
-    if (!upstream.ok) {
-      return json({ data: { results: [], configured: true }, error: null })
+  for (const model of models) {
+    let parsed: any | null = null
+    try {
+      parsed = await ask(key, model, exercises)
+    } catch {
+      continue
     }
-
-    const payload = await upstream.json()
-    const content = payload?.choices?.[0]?.message?.content ?? '{}'
-    const parsed = JSON.parse(content)
-    const results = Array.isArray(parsed?.results) ? parsed.results : []
+    if (!parsed) continue
 
     return json({
       data: {
         configured: true,
-        results: results.map((r: any) => ({
+        model,
+        results: parsed.results.map((r: any) => ({
           exercise: String(r?.exercise ?? ''),
           primary: sanitize(r?.primary),
           secondary: sanitize(r?.secondary),
@@ -91,10 +87,10 @@ export async function onRequest(context: any) {
       },
       error: null,
     })
-  } catch {
-    // Upstream unreachable or malformed — degrade to manual selection.
-    return json({ data: { results: [], configured: true }, error: null })
   }
+
+  // Every model failed — degrade to manual selection rather than erroring.
+  return json({ data: { results: [], configured: true }, error: null })
 }
 
 function json(obj: any, status = 200) {
@@ -102,4 +98,30 @@ function json(obj: any, status = 200) {
     status,
     headers: { 'content-type': 'application/json' },
   })
+}
+
+/** Ask one model; returns the parsed JSON body or null if it can't be used. */
+async function ask(key: string, model: string, exercises: string[]): Promise<any | null> {
+  const upstream = await fetch(ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.1,
+      max_tokens: 800,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: SYSTEM },
+        { role: 'user', content: JSON.stringify({ exercises }) },
+      ],
+    }),
+  })
+
+  if (!upstream.ok) return null
+  const payload = await upstream.json()
+  const parsed = JSON.parse(payload?.choices?.[0]?.message?.content ?? '{}')
+  return Array.isArray(parsed?.results) ? parsed : null
 }
