@@ -8,6 +8,7 @@ import Habits from './pages/Habits'
 import Body from './pages/Body'
 import Gym from './pages/Gym'
 import Coach from './pages/Coach'
+import Career from './pages/Career'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
 
@@ -36,6 +37,7 @@ function AppRoutes() {
           <Route path="/body" element={<ProtectedRoute><Body /></ProtectedRoute>} />
           <Route path="/gym" element={<ProtectedRoute><Gym /></ProtectedRoute>} />
           <Route path="/coach" element={<ProtectedRoute><Coach /></ProtectedRoute>} />
+          <Route path="/career" element={<ProtectedRoute><Career /></ProtectedRoute>} />
           <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

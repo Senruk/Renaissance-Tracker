@@ -3,23 +3,16 @@ import { useAuth } from '../contexts/AuthContext'
 import { useData } from '../hooks/useData'
 import { supabase } from '../lib/supabase-enhanced'
 import GlassCard from '../components/ui/GlassCard'
-import BodyDiagram from '../components/3d/BodyDiagram'
 import WaterTracker from '../components/dashboard/WaterTracker'
 import MoodSelector from '../components/dashboard/MoodSelector'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Dumbbell, Heart, TrendingUp, Clock, Trash2 } from 'lucide-react'
+import { Heart, TrendingUp, Clock, Trash2 } from 'lucide-react'
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const springConfig = reducedMotion
   ? { duration: 0 }
   : { type: 'spring' as const, stiffness: 400, damping: 30 }
 const tapWhileTap = reducedMotion ? {} : { scale: 0.97 }
-
-const MUSCLE_LABELS: Record<string, string> = {
-  chest: 'Chest', back: 'Back', shoulders: 'Shoulders', biceps: 'Biceps',
-  triceps: 'Triceps', forearms: 'Forearms', abs: 'Core / Abs',
-  quads: 'Quads', hamstrings: 'Hamstrings', glutes: 'Glutes', calves: 'Calves',
-}
 
 export default function Body() {
   useEffect(() => {
@@ -33,12 +26,7 @@ export default function Body() {
 
   const { user, addXP } = useAuth()
   const { data, today, todayWater, todayMood, refresh } = useData()
-  const [tab, setTab] = useState<'gym' | 'health' | 'meals' | 'work'>('gym')
-
-  // Gym state
-  const [selectedMuscles, setSelectedMuscles] = useState<string[]>([])
-  const [workoutDuration, setWorkoutDuration] = useState('')
-  const [workoutNotes, setWorkoutNotes] = useState('')
+  const [tab, setTab] = useState<'health' | 'meals' | 'work'>('health')
 
   // Health state
   const [weight, setWeight] = useState('')
@@ -58,29 +46,6 @@ export default function Body() {
   const [workCategory, setWorkCategory] = useState('focused')
 
   const XP = { WORKOUT_LOG: 25, WATER_GOAL: 5, MOOD_LOG: 3 }
-
-  function handleMuscleClick(muscle: string) {
-    if (muscle === 'head') return
-    setSelectedMuscles(prev =>
-      prev.includes(muscle) ? prev.filter(m => m !== muscle) : [...prev, muscle],
-    )
-  }
-
-  async function logWorkout() {
-    if (selectedMuscles.length === 0) return
-    await supabase.from('workout_logs').insert({
-      user_id: user?.id,
-      date: today,
-      muscle_groups: selectedMuscles,
-      duration: parseInt(workoutDuration) || null,
-      notes: workoutNotes,
-    })
-    await addXP(XP.WORKOUT_LOG + selectedMuscles.length * 5, 'workout')
-    setSelectedMuscles([])
-    setWorkoutDuration('')
-    setWorkoutNotes('')
-    await refresh()
-  }
 
   async function handleMoodSelect(value: number) {
     if (todayMood) {
@@ -145,7 +110,6 @@ export default function Body() {
   }
 
   const TABS = [
-    { id: 'gym', label: 'Gym', icon: Dumbbell },
     { id: 'health', label: 'Health', icon: Heart },
     { id: 'meals', label: 'Meals', icon: TrendingUp },
     { id: 'work', label: 'Work', icon: Clock },
@@ -189,52 +153,6 @@ export default function Body() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
         >
-          {tab === 'gym' && (
-            <>
-              <GlassCard>
-                <div className="flex items-center gap-2 mb-2">
-                  <Dumbbell size={16} className="text-accent-pink" />
-                  <span className="text-xs text-text-tertiary uppercase tracking-wider font-medium">Tap muscles you worked</span>
-                </div>
-                <BodyDiagram highlightedMuscles={selectedMuscles} onMuscleClick={handleMuscleClick} />
-                {selectedMuscles.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {selectedMuscles.map(m => (
-                      <span key={m} className="text-[10px] px-2 py-0.5 rounded-full bg-accent-gold/10 text-accent-gold border border-accent-gold/20">
-                        {MUSCLE_LABELS[m] || m}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </GlassCard>
-
-              <GlassCard>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-text-tertiary" />
-                    <input
-                      type="number" value={workoutDuration} onChange={(e) => setWorkoutDuration(e.target.value)}
-                      placeholder="Duration (minutes)"
-                      className="flex-1 bg-bg-secondary/80 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-accent-gold/50"
-                    />
-                  </div>
-                  <textarea
-                    value={workoutNotes} onChange={(e) => setWorkoutNotes(e.target.value)}
-                    placeholder="Notes (sets, reps, weights...)"
-                    className="w-full bg-bg-secondary/80 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-accent-gold/50 resize-none h-16"
-                  />
-                  <button
-                    onClick={logWorkout}
-                    disabled={selectedMuscles.length === 0}
-                    className="w-full py-2.5 rounded-lg font-medium text-sm transition-all bg-accent-pink/20 text-accent-pink border border-accent-pink/30 hover:bg-accent-pink/30 disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    Log Workout {selectedMuscles.length > 0 && `(${selectedMuscles.length} muscles)`}
-                  </button>
-                </div>
-              </GlassCard>
-            </>
-          )}
-
           {tab === 'health' && (
             <>
               <GlassCard>
